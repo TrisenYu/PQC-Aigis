@@ -1,7 +1,7 @@
-#include "../aigis_const.h"
-#include "../reduce.h"
-#include "../ntt.h"
-#include "../poly.h"
+#include "../../aigis_const.h"
+#include "../../reduce.h"
+#include "../../ntt.h"
+#include "../../poly.h"
 #include <stdio.h>
 
 int16_t a[AIGIS_N] = {
@@ -65,7 +65,7 @@ uint32_t xa[AIGIS_N] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -86,17 +86,17 @@ void dump_b() {
 }
 
 int main() {
-    printf("0x%08x\n", (1uLL << 32)-1);
-    enc_ntt(a);
-    enc_ntt(b);
-    enc_poly_dot_mul(a, a, b);
-    enc_inv_ntt(a);
-    enc_inv_ntt(b);
-    for (int i = 0; i < AIGIS_N; i ++) {
-        printf("%3d, ", a[i]);
-        if ((i + 1) % 16 == 0) { puts(""); }
-    }
-    dump_b();
+    // printf("0x%08x\n", (1uLL << 32)-1);
+    // enc_ntt(a);
+    // enc_ntt(b);
+    // enc_poly_dot_mul(a, a, b);
+    // enc_inv_ntt(a);
+    // enc_inv_ntt(b);
+    // for (int i = 0; i < AIGIS_N; i ++) {
+    //     printf("%3d, ", a[i]);
+    //     if ((i + 1) % 16 == 0) { puts(""); }
+    // }
+    // dump_b();
 
     sig_ntt(xa);
     sig_ntt(xb);

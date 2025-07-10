@@ -9,9 +9,8 @@
     #include <errno.h>
 #endif // windows check
 
-#include <unistd.h>
-
 #ifdef __linux__
+    #include <unistd.h>
     #define _GNU_SOURCE
     #include <sys/syscall.h>
 #endif // linux check

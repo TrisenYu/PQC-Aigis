@@ -1,7 +1,7 @@
 #include "../aigis_enc.h"
 #include "../debug.h"
 
-uint8_t msg[AIGIS_SEED_SIZE] = "helloworld?!?!?!?!";
+uint8_t msg[AIGIS_SEED_SIZE] = "hello world?!?!?";
 
 uint8_t pubkey[AIGIS_ENC_PUB_SIZE],
         seckey[AIGIS_ENC_SEC_SIZE],
@@ -24,6 +24,7 @@ int main() {
         puts("keygen failed!");
         return 1;
     }
+    puts("");
     ret = aigis_enc_encrypt(test_cipher, msg, pubkey, coins);
     if (ret) {
         return 1 * puts("encryption failed!");
@@ -37,9 +38,7 @@ int main() {
         dump_u8arr(test_text, AIGIS_SEED_SIZE);
         return 1;    
     }
-	for (int i = 0; i < AIGIS_SEED_SIZE; i ++) {
-		putchar(test_text[i]);
-	}
+    puts(test_text);
     puts("well done!");
     return 0;
 }

@@ -1,7 +1,15 @@
+
 #include "aigis_const.h"
 #include "poly.h"
+
+// #ifdef __DEBUG
+// #include "debug.h"
+// #include <stdio.h>
+// #endif 
+
 #ifndef __COMP_H__
 #define __COMP_H__
+
 
 /// 解压缩算法
 static void comp_poly_3(
@@ -12,7 +20,7 @@ static void comp_poly_3(
 	for (; i < AIGIS_N; i += 8, k += 3) {
 		for (j = 0; j < 8; j ++) {
 			// q/2？
-			t[j] = ((((uint32_t)a[i+j] << 3) + AIGIS_ENC_MOD_Q / 2) / AIGIS_ENC_MOD_Q) & 7;
+			t[j] = ((((uint32_t)a[i+j] << 3) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 7;
 		}
 		res[k] = t[0] | (t[1] << 3) | (t[2] << 6);
 		res[k+1] = (t[2] >> 2) | (t[3] << 1) | (t[4] << 4) | (t[5] << 7);
@@ -26,8 +34,8 @@ static void comp_poly_4(
 ) {
 	uint32_t i = 0, t[2];
 	for (; i < AIGIS_N >> 1; i ++) {
-		t[0] = ((((uint32_t)a[i << 1] << 4) + AIGIS_ENC_MOD_Q / 2) / AIGIS_ENC_MOD_Q) & 0xF;
-		t[1] = ((((uint32_t)a[i << 1 | 1] << 4) + AIGIS_ENC_MOD_Q / 2) / AIGIS_ENC_MOD_Q) & 0xF;
+		t[0] = ((((uint32_t)a[i << 1] << 4) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 0xF;
+		t[1] = ((((uint32_t)a[i << 1 | 1] << 4) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 0xF;
 		res[i] = t[0] | (t[1] << 4);
 	}
 }
@@ -39,7 +47,7 @@ static void comp_poly_5(
 	uint32_t i = 0, j, k = 0, t[8];
 	for (; i < AIGIS_N; i += 8, k += 5) {
 		for (j = 0; j < 8; j++) {
-			t[j] = ((((uint32_t)a[i + j] << 5) + AIGIS_ENC_MOD_Q / 2) / AIGIS_ENC_MOD_Q) & 0x1f;
+			t[j] = ((((uint32_t)a[i + j] << 5) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 0x1f;
 		}
 		res[k] = t[0] | (t[1] << 5);
 		res[k + 1] = (t[1] >> 3) | (t[2] << 2) | (t[3] << 7);
@@ -56,7 +64,7 @@ static void comp_poly_7(
 	uint32_t i = 0, j, k = 0, t[8];
 	for (; i < AIGIS_N; i ++, k += 7) {
 		for (j = 0; j < 8; j ++) {
-			t[j] = ((((uint32_t)a[i+j] << 7) + AIGIS_ENC_MOD_Q/2)/AIGIS_ENC_MOD_Q) & 0x7F;	
+			t[j] = ((((uint32_t)a[i+j] << 7) + (AIGIS_ENC_MOD_Q>>1))/AIGIS_ENC_MOD_Q) & 0x7F;	
 		}
 		res[k] = t[0] | (t[1] << 7);
 		res[k + 1] = (t[1] >> 1) | (t[2] << 6);
@@ -405,5 +413,434 @@ void (*enc_cft_poly_decompresser) (
 	#error "unsupport configuration for poly_decompressor!"
 #endif // configuration for poly_decompresser().
 
+/// 和签名解压缩有关的算法
+
+/// sig多项式编译期检查
+/// TODO: 写得太神秘了
+#if AIGIS_SIG_QBITS - AIGIS_SIG_D != 8
+	#error "polyt1_pack() assumes AIGIS_SIG_QBITS - AIGIS_SIG_D == 8"
+#endif // 对AIGIS_SIG_QBITS的检查
+#if AIGIS_SIG_D != 13 && AIGIS_SIG_D != 14
+	#error "polyt0_unpack() assumes AIGIS_SIG_D== 13 or 14"
+#endif // 对AIGIS_SIG_D的检查
+#if AIGIS_SIG_MOD_Q > 8*AIGIS_SIG_ALPHA
+#endif // pack_poly_w1
+
+
+/// 签名算法打包函数
+static uint8_t sig_comp_poly1_4(
+	uint8_t *res,
+	uint32_t eta_val,
+	const sig_poly a
+) {
+  	uint8_t t[8];
+	for (int i = 0; i < AIGIS_N / 4; ++i) {
+		for (int j = 0; j < 4; j ++) {
+			t[j] = AIGIS_SIG_MOD_Q + eta_val - a[4*i+j];
+		}
+		res[i] = t[0] | (t[1] << 2) | (t[2] << 4) | (t[3] << 6);
+	}
+	return 0;
+}
+
+static uint8_t sig_comp_poly3_8(
+	uint8_t *res,
+	uint32_t eta_val,
+	const sig_poly a
+) {
+	uint8_t t[8];
+	for(int i = 0; i < AIGIS_N/8; ++i) {
+		for (int j = 0; j < 8; j ++) {
+			t[j] = AIGIS_SIG_MOD_Q + eta_val - a[8*i+j];
+		}
+		res[3*i+0]  = t[0];
+		res[3*i+0] |= t[1] << 3;
+		res[3*i+0] |= t[2] << 6;
+		res[3*i+1]  = t[2] >> 2;
+		res[3*i+1] |= t[3] << 1;
+		res[3*i+1] |= t[4] << 4;
+		res[3*i+1] |= t[5] << 7;
+		res[3*i+2]  = t[5] >> 1;
+		res[3*i+2] |= t[6] << 2;
+		res[3*i+2] |= t[7] << 5;
+	}
+	return 0;
+}
+
+static uint8_t sig_comp_poly1_2(
+	uint8_t *res,
+	uint32_t eta_val,
+	const sig_poly a
+) {
+	uint8_t t[2];
+	for(int i = 0; i < AIGIS_N>>1; ++i) {
+		t[0] = AIGIS_SIG_MOD_Q + eta_val - a[2*i+0];
+		t[1] = AIGIS_SIG_MOD_Q + eta_val - a[2*i+1];
+		res[i] = t[0] | (t[1] << 4);
+	}
+	return 0;
+}
+
+
+static uint8_t sig_comp_poly13_8(
+	uint8_t *res,
+	const sig_poly a
+) {
+	uint32_t t[8];
+	for(int i = 0; i < AIGIS_N/8; ++i) {
+		for (int j = 0; j < 8; j ++) {
+			t[j] = AIGIS_SIG_MOD_Q + 4096 - a[8*i+j];
+		}
+		res[13*i+0]   =  t[0];
+		res[13*i+1]   =  t[0] >> 8;
+		res[13*i+1]  |=  t[1] << 5;
+		res[13*i+2]   =  t[1] >> 3;
+		res[13*i+3]   =  t[1] >> 11;
+		res[13*i+3]  |=  t[2] << 2;
+		res[13*i+4]   =  t[2] >> 6;
+		res[13*i+4]  |=  t[3] << 7;
+		res[13*i+5]   =  t[3] >> 1;
+		res[13*i+6]   =  t[3] >> 9;
+		res[13*i+6]  |=  t[4] << 4;
+		res[13*i+7]   =  t[4] >> 4;
+		res[13*i+8]   =  t[4] >> 12;
+		res[13*i+8]  |=  t[5] << 1;
+		res[13*i+9]   =  t[5] >> 7;
+		res[13*i+9]  |=  t[6] << 6;
+		res[13*i+10]  =  t[6] >> 2;
+		res[13*i+11]  =  t[6] >> 10;
+		res[13*i+11] |=  t[7] << 3;
+		res[13*i+12]  =  t[7] >> 5;
+	}
+	return 0;
+}
+
+static uint8_t sig_comp_poly7_4(
+	uint8_t *res,
+	const sig_poly a
+) {
+	uint32_t t[4];
+	for(int i = 0; i < AIGIS_N/4; ++i) {
+		for (int j = 0; j < 4; j ++) {
+			t[j] = AIGIS_SIG_MOD_Q + 8192 - a[4*i+j];
+		}
+		res[7*i+0]  =  t[0];
+		res[7*i+1]  =  t[0] >> 8;
+		res[7*i+1] |=  t[1] << 6;
+		res[7*i+2]  =  t[1] >> 2;
+		res[7*i+3]  =  t[1] >> 10;
+		res[7*i+3] |=  t[2] << 4;
+		res[7*i+4]  =  t[2] >> 4;
+		res[7*i+5]  =  t[2] >> 12;
+		res[7*i+5] |=  t[3] << 2;
+		res[7*i+6]  =  t[3] >> 6;
+	}  
+	return 0;
+}
+
+/// 签名算法解包函数
+static uint8_t sig_decomp_poly2_1(
+	sig_poly res,
+	uint32_t eta_val,
+	const uint8_t *a
+) {
+	for(int i = 0; i < AIGIS_N>>1; ++i) {
+		res[2*i+0] = a[i] & 0x0F;
+		res[2*i+1] = a[i]>>4;
+		res[2*i+0] = AIGIS_SIG_MOD_Q + eta_val - res[2*i+0];
+		res[2*i+1] = AIGIS_SIG_MOD_Q + eta_val - res[2*i+1];
+	}
+	return 0;
+}
+
+
+static uint8_t sig_decomp_poly4_1(
+	sig_poly res,
+	uint32_t eta_val,
+	const uint8_t *a
+) {
+	for (int i = 0; i < AIGIS_N >> 2; i ++) {
+		res[4*i+0] =  a[i] & 0b11;	
+		res[4*i+1] = (a[i]>>2) & 0b11;	
+		res[4*i+2] = (a[i]>>4) & 0b11;	
+		res[4*i+3] = (a[i]>>6) & 0b11;
+
+		res[4*i+0] = AIGIS_SIG_MOD_Q + eta_val - res[4*i+0];
+		res[4*i+1] = AIGIS_SIG_MOD_Q + eta_val - res[4*i+1];
+		res[4*i+2] = AIGIS_SIG_MOD_Q + eta_val - res[4*i+2];
+		res[4*i+3] = AIGIS_SIG_MOD_Q + eta_val - res[4*i+3];
+	}
+	return 0;
+}
+
+static uint8_t sig_decomp_poly8_3(
+	sig_poly res,
+	uint32_t eta_val,
+	const uint8_t *a
+) {
+	/// TODO: 为什么第15个总是不对？
+	for (int i = 0; i < AIGIS_N >> 3; i ++) {
+		res[8*i+0] =  a[3*i+0] & 0b111;
+		res[8*i+1] = (a[3*i+0]>>3) & 0b111;
+		res[8*i+2] = (a[3*i+0]>>6) | ((a[3*i+1]&0b001) << 2);
+		res[8*i+3] = (a[3*i+1]>>1) & 0b111;
+		res[8*i+4] = (a[3*i+1]>>4) & 0b111;
+		res[8*i+5] = (a[3*i+1]>>7) | ((a[3*i+2]&0b011) << 1);
+		res[8*i+6] = (a[3*i+2]>>2) & 0b111;
+		res[8*i+7] = (a[3*i+2]>>5);
+
+		for (int j = 0; j < 8; j ++) {
+			res[8*i+j] = AIGIS_SIG_MOD_Q + eta_val - res[8*i+j];
+		}
+	}
+	return 0;
+}
+
+
+static uint8_t sig_decomp_poly8_13(
+	sig_poly res,
+	const uint8_t *a
+) {
+	for (int i = 0; i < AIGIS_N>>3; i++) {
+		res[8*i+0]  = a[13*i+0];
+		res[8*i+0] |= (uint32_t)(a[13*i+1] & 0x1F)<<8;
+
+		res[8*i+1]  = a[13*i+1]>>5;
+		res[8*i+1] |= (uint32_t)a[13*i+2]<< 3;
+		res[8*i+1] |= (uint32_t)(a[13*i+3] & 0x3)<< 11;
+
+		res[8*i+2]  = a[13*i+3]>>2;
+		res[8*i+2] |= (uint32_t)(a[13*i+4] & 0x7F)<< 6;
+
+		res[8*i+3]  = a[13*i+4]>>7;
+		res[8*i+3] |= (uint32_t)a[13*i+5]<< 1;
+		res[8*i+3] |= (uint32_t)(a[13*i+6] & 0x0F)<< 9;
+
+		res[8*i+4]  = a[13*i+ 6]>>4;
+		res[8*i+4] |= (uint32_t)a[13*i+ 7]<< 4;
+		res[8*i+4] |= (uint32_t)(a[13*i+8] & 0x01)<< 12;
+
+		res[8*i+5]  = a[13*i+8]>>1;
+		res[8*i+5] |= (uint32_t)(a[13*i+9] & 0x3F)<< 7;
+
+		res[8*i+6]  = a[13*i+9]>>6;
+		res[8*i+6] |= (uint32_t)a[13*i+10]<< 2;
+		res[8*i+6] |= (uint32_t)(a[13*i+11] & 0x07)<< 10;
+
+		res[8*i+7]  = a[13*i+11]>>3;
+		res[8*i+7] |= (uint32_t)a[13*i+12]<< 5;
+
+		/// 12 = AIGIS_SIG_D - 1
+		/// 1 << 12 = 4096 
+		for (int j = 0; j < 8; j ++) {
+			res[8*i+j] = AIGIS_SIG_MOD_Q + 4096 - res[8*i+j];
+		}
+	}
+	return 0;
+}
+
+static uint8_t sig_decomp_poly4_7(
+	sig_poly res,
+	const uint8_t *a
+) {
+	for(int i = 0; i < AIGIS_N>>2; ++i) {
+		res[4*i+0]  = a[7*i+0];
+		res[4*i+0] |= (uint32_t)(a[7*i+1] & 0x3F) << 8;
+
+		res[4*i+1]  = a[7*i+1] >> 6;
+		res[4*i+1] |= (uint32_t)a[7*i+2] << 2;
+		res[4*i+1] |= (uint32_t)(a[7*i+3] & 0x0F) << 10;
+		
+		res[4*i+2]  = a[7*i+3] >> 4;
+		res[4*i+2] |= (uint32_t)a[7*i+4] << 4;
+		res[4*i+2] |= (uint32_t)(a[7*i+5] & 0x03) << 12;
+
+		res[4*i+3]  = a[7*i+5] >> 2;
+		res[4*i+3] |= (uint32_t)a[7*i+6] << 6;
+
+		/// 13 = AIGIS_SIG_D - 1
+		/// 1 << 13 = 4096
+		for (int j = 0; j < 4; j ++) {
+			res[4*i+j] = AIGIS_SIG_MOD_Q + 8192 - res[4*i+j];
+		}
+	}
+	return 0;
+}
+
+/// 其它部分
+void sig_poly_z_compresser(
+	uint8_t *res,
+	const sig_poly a
+) {
+	uint32_t i, t[4];
+	for(i = 0; i < AIGIS_N/4; ++i) {
+		/* Map to {0,...,2*AIGIS_SIG_GAMMA1 - 2} */ // 18-bit
+		t[0] = AIGIS_SIG_GAMMA1 - 1 - a[4*i+0];
+		t[0] += ((int32_t)t[0] >> 31) & AIGIS_SIG_MOD_Q;
+		t[1] = AIGIS_SIG_GAMMA1 - 1 - a[4*i+1];
+		t[1] += ((int32_t)t[1] >> 31) & AIGIS_SIG_MOD_Q;
+		t[2] = AIGIS_SIG_GAMMA1 - 1 - a[4*i+2];
+		t[2] += ((int32_t)t[2] >> 31) & AIGIS_SIG_MOD_Q;
+		t[3] = AIGIS_SIG_GAMMA1 - 1 - a[4*i+3];
+		t[3] += ((int32_t)t[3] >> 31) & AIGIS_SIG_MOD_Q;
+
+		res[9*i+0]  = t[0];
+		res[9*i+1]  = t[0] >> 8;
+		res[9*i+2]  = t[0] >> 16;
+		res[9*i+2] |= t[1] << 2;
+		res[9*i+3]  = t[1] >> 6;
+		res[9*i+4]  = t[1] >> 14;
+		res[9*i+4] |= t[2] << 4;
+		res[9*i+5]  = t[2] >> 4;
+		res[9*i+6]  = t[2] >> 12;
+		res[9*i+6] |= t[3] << 6;
+		res[9*i+7]  = t[3] >> 2;
+		res[9*i+8]  = t[3] >> 10;
+
+	}
+}
+
+void sig_poly_z_decompresser(
+	sig_poly res,
+	const uint8_t *a
+) {
+	for(int i = 0; i < AIGIS_N>>2; ++i) {
+		res[4*i+0]  = a[9*i+0];
+		res[4*i+0] |= (uint32_t)a[9*i+1] << 8;
+		res[4*i+0] |= (uint32_t)(a[9*i+2] & 0x03) << 16;
+		res[4*i+0] = AIGIS_SIG_GAMMA1 - 1 - res[4*i+0];
+		res[4*i+0] += ((int32_t)res[4*i+0] >> 31) & AIGIS_SIG_MOD_Q;
+
+		res[4*i+1]  = a[9*i+2] >> 2;
+		res[4*i+1] |= (uint32_t)a[9*i+3] << 6;
+		res[4*i+1] |= (uint32_t)(a[9*i+4] & 0x0F) << 14;
+		res[4*i+1] = AIGIS_SIG_GAMMA1 - 1 - res[4*i+1];
+		res[4*i+1] += ((int32_t)res[4*i+1] >> 31) & AIGIS_SIG_MOD_Q;
+
+		res[4*i+2]  = a[9*i+4] >> 4;
+		res[4*i+2] |= (uint32_t)a[9*i+5] << 4;
+		res[4*i+2] |= (uint32_t)(a[9*i+6] & 0x3F) << 12;
+		res[4*i+2] = AIGIS_SIG_GAMMA1 - 1 - res[4*i+2];
+		res[4*i+2] += ((int32_t)res[4*i+2] >> 31) & AIGIS_SIG_MOD_Q;
+
+
+		res[4*i+3]  = a[9*i+6] >> 6;
+		res[4*i+3] |= (uint32_t)a[9*i+7] << 2;
+		res[4*i+3] |= (uint32_t)a[9*i+8] << 10;
+		res[4*i+3] = AIGIS_SIG_GAMMA1 - 1 - res[4*i+3];
+		res[4*i+3] += ((int32_t)res[4*i+3] >> 31) & AIGIS_SIG_MOD_Q;
+	}
+}
+
+/// 要是c支持curry也不至于这么写
+
+
+uint8_t sig_poly_eta_s_compresser(
+	uint8_t *res,
+	const sig_poly a 
+) {
+	switch(AIGIS_SIG_ETA_S) {
+	case 1:
+		return sig_comp_poly1_4(res, 1, a);
+	default:
+		return sig_comp_poly3_8(res, AIGIS_SIG_ETA_S, a);
+	}
+}
+
+uint8_t sig_poly_eta_s_decompresser(
+	sig_poly res,
+	const uint8_t *a
+) {
+	switch(AIGIS_SIG_ETA_S) {
+	case 1:
+		return sig_decomp_poly4_1(res, 1, a);
+	default:
+		return sig_decomp_poly8_3(res, AIGIS_SIG_ETA_S, a);
+	}
+}
+
+uint8_t sig_poly_eta_e_compresser(
+	uint8_t *res,
+	const sig_poly a
+) {
+	if (AIGIS_SIG_ETA_E <= 3) {
+		return sig_comp_poly3_8(res, AIGIS_SIG_ETA_E, a);
+	}
+	return sig_comp_poly1_2(res, AIGIS_SIG_ETA_E, a);
+}
+
+#define UNPACK_ERR 1
+uint8_t sig_poly_eta_e_decompresser(
+	sig_poly res,
+	const uint8_t *a
+) {
+	if (AIGIS_SIG_ETA_E <= 3) {
+		return sig_decomp_poly8_3(res, AIGIS_SIG_ETA_E, a);
+	} else if (AIGIS_SIG_ETA_E > 7) {
+		return UNPACK_ERR;
+	}
+	return sig_decomp_poly2_1(res, AIGIS_SIG_ETA_E, a);
+}
+#define PACK_ERR UNPACK_ERR
+uint8_t sig_poly_t0_compresser(
+	uint8_t *res,
+	const sig_poly a 
+) {
+	switch(AIGIS_SIG_D) {
+	case 13:
+		return sig_comp_poly13_8(res, a);
+	case 14:
+		return sig_comp_poly7_4(res, a);
+	default:
+		return PACK_ERR;
+	}
+}
+#undef PACK_ERR
+
+uint8_t sig_poly_t0_decompresser(
+	sig_poly res,
+	const uint8_t *a
+) {
+	switch(AIGIS_SIG_D) {
+	case 13:
+		return sig_decomp_poly8_13(res, a);
+	case 14:
+		return sig_decomp_poly4_7(res, a);
+	default:
+		return UNPACK_ERR;	
+	}
+}
+#undef UNPACK_ERR
+
+
+/// 大小不匹配啊
+void sig_poly_t1_compresser(
+	uint8_t *res,
+	const sig_poly a 
+) {
+	for (int i = 0; i < AIGIS_N; i ++) {
+		res[i] = a[i];	
+	}
+}
+/// 大小不匹配啊
+void sig_poly_t1_decompresser(
+	sig_poly res,
+	const uint8_t *a
+) {
+	for (int i = 0; i < AIGIS_N; i ++) {
+		res[i] = a[i];	
+	}
+}
+
+void sig_poly_w1_compresser(
+	uint8_t *res,
+	const sig_poly a
+) {
+	for (int i = 0; i < AIGIS_N >> 3; i ++) {
+    	res[3*i+0] = a[8*i+0]      | (a[8*i+1] << 3) | (a[8*i+ 2] << 6);
+		res[3*i+1] = (a[8*i+2]>>2) | (a[8*i+3] << 1) | (a[8*i+ 4] << 4) | (a[8*i+ 5] << 7);
+		res[3*i+2] = (a[8*i+5]>>1) | (a[8*i+6] << 2) | (a[8*i+ 7] << 5);
+	}
+}
 
 #endif // COMP_H

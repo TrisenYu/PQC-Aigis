@@ -1,42 +1,24 @@
-kdf_conf=0
-alg_conf=1
+kdf_conf=1
+# 好像第三个参数炸了
+alg_conf=3
+CONF=-DAIGIS_PARAM_CONF=$(alg_conf)
+CONF+=-DAIGIS_KDF_CONF=$(kdf_conf)
 
-AIGIS_CONF=-DAIGIS_PARAM_CONF=$(alg_conf)
-AIGIS_CONF+=-DAIGIS_KDF_CONF=$(kdf_conf)
-
-flags=-O3 -g
-
-clang_test=$(shell clang --version)
-ifneq ($(clang_test),)
-	CC:=clang
-else
-	CC:=gcc
-endif
-
-ifeq ($(OS),WindowsNT)
-	RM=del
-else
-	RM=rm
-endif
-
-test-src=$(wildcard  *.c)
-test-exe=$(patsubst %.c,%.exe, $(test-src))
-build: $(test-exe)
-
-%.exe: %.c
-	$(CC) $(AIGIS_CONF) $(flags) -o $@ $<
-
-# gcc test_ntt.c $(CONF) $(comp_conf) -o a.exe
-# gcc test_rej.c $(CONF) $(comp_conf) -o b.exe
-# gcc test_comp.c $(CONF) $(comp_conf) -o c.exe
-# gcc test_enc.c $(CONF) $(comp_conf) -o e.exe
-# gcc test_mat.c $(CONF) $(comp_conf) -o m.exe
+build:
+	gcc test_ntt.c $(CONF) -O3 -o a.exe
+	gcc test_rej.c $(CONF) -O3 -o b.exe
+	gcc test_comp.c $(CONF) -O3 -o c.exe
+	gcc test_enc.c $(CONF) -O3 -o e.exe
 
 run:
-	@for var in $(test-exe); do \
-		echo [$$var];			\
-		./$$var;	  			\
-	done
+	@echo -------------------- Test 1 --------------------
+	@./a.exe
+	@echo -------------------- Test 2 --------------------
+	@./b.exe
+	@echo -------------------- Test 3 --------------------
+	@./c.exe
+	@echo -------------------- Test 3 --------------------
+	@./e.exe
 
 clean:
-	$(RM) *.exe
+	del *.exe
