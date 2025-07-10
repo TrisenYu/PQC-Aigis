@@ -1,10 +1,11 @@
 kdf_conf=0
-alg_conf=1
+alg_conf=2
 
 AIGIS_CONF=-DAIGIS_PARAM_CONF=$(alg_conf)
 AIGIS_CONF+=-DAIGIS_KDF_CONF=$(kdf_conf)
 
-flags=-O3 -g
+flags=-O3
+# -ftrapv
 
 clang_test=$(shell clang --version)
 ifneq ($(clang_test),)
@@ -13,30 +14,36 @@ else
 	CC:=gcc
 endif
 
-ifeq ($(OS),WindowsNT)
+# windows 真是问题多多
+ifeq ($(OS),Windows_NT)
 	RM=del
+	CC=gcc
+	suffix=.exe
 else
 	RM=rm
+	suffix=.out
 endif
 
-test-src=$(wildcard  *.c)
-test-exe=$(patsubst %.c,%.exe, $(test-src))
+test-src=$(wildcard *.c)
+test-exe=$(patsubst %.c,%$(suffix), $(test-src))
+
+phony=build
 build: $(test-exe)
 
-%.exe: %.c
+%$(suffix): %.c
 	$(CC) $(AIGIS_CONF) $(flags) -o $@ $<
 
-# gcc test_ntt.c $(CONF) $(comp_conf) -o a.exe
-# gcc test_rej.c $(CONF) $(comp_conf) -o b.exe
-# gcc test_comp.c $(CONF) $(comp_conf) -o c.exe
-# gcc test_enc.c $(CONF) $(comp_conf) -o e.exe
-# gcc test_mat.c $(CONF) $(comp_conf) -o m.exe
 
+# 非预期var？那windows怎么办？
+phony+=run
 run:
 	@for var in $(test-exe); do \
 		echo [$$var];			\
 		./$$var;	  			\
 	done
 
+phony+=clean
 clean:
-	$(RM) *.exe
+	$(RM) *$(suffix)
+
+.PHONY: $(phony)

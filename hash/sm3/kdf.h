@@ -13,8 +13,7 @@
     } while(0)
 
 
-// kdf_extented.
-/*
+/* kdf_extented.
 	通过多次对已扩展的数据做sm3，以使sm3支持任意输出长度。
 */
 void sm3_extented(
@@ -39,9 +38,6 @@ void sm3_extented(
     }
     memcpy(out, res, outlen);
     free(in_ext);
-    in_ext = NULL;
     free(res);
-
-    res = NULL;
 }
 #endif // KDF_H

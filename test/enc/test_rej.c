@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
-#include "../kdf_aux.h"
+#include "../../kdf_aux.h"
 uint16_t _8cast16(uint8_t x) { return (uint16_t)(x); }
 uint16_t aigis_read_qbits(
 	const uint8_t *buf, 
@@ -167,22 +167,19 @@ void poly_uniform_seed(
 ) {
 	int32_t cur = 0, pos, step;
 	uint8_t buf[480+KDF128_RATE];
-	uint32_t nblock = (480+KDF128_RATE-1) / KDF128_RATE;
+	uint32_t len = (480+KDF128_RATE-1);
 
-	uint32_t len;
 	aigis_kdf_state state;
 	kdf_init(&state, seed_size);
-	kdf_absorb(&state, seed, seed_size);
-    kdf_squeeze(&state, buf, nblock);
+	kdf128_absorb(&state, seed, seed_size);
+    kdf_squeeze(&state, buf, len);
 	
-
-	len = nblock * KDF128_RATE;
 	pos = rej_uniform(r, &cur, 256, buf, len);
 	len -= pos;
 	while (cur < 256) {
 		pos -= KDF128_RATE;
 		len += KDF128_RATE;
-		kdf_squeeze(&state, &buf[pos], 1);
+		kdf_squeeze(&state, &buf[pos], KDF128_RATE);
 		step = rej_uniform(r, &cur, 256, &buf[pos], len);
 		pos += step;
 		len -= step;
@@ -200,20 +197,20 @@ void aigis_xof_and_parse(
 		n_blocks 则为 {15}
 	 */
 	uint8_t buf[480+KDF128_RATE];
-	uint32_t n_blocks = (480+KDF128_RATE-1) / KDF128_RATE;
+	uint32_t len = 480+KDF128_RATE-1;
 
     aigis_kdf_state state;
 	kdf_init(&state, seed_size);
-	kdf_absorb(&state, seed, seed_size);
-    kdf_squeeze(&state, buf, n_blocks);
+	kdf128_absorb(&state, seed, seed_size);
+    kdf_squeeze(&state, buf, len);
     // 以上是 xof 部分，下面 parse，不过改完以后还是非常抽象
-    uint32_t cur = 0, len = n_blocks * KDF128_RATE,
-		pos = aigis_modified_reject_sampling(coeff, &cur, buf, len);
+    uint32_t cur = 0,
+			 pos = aigis_modified_reject_sampling(coeff, &cur, buf, len);
 	len -= pos;
 	while (cur < 256) {
 		pos -= KDF128_RATE;
 		len += KDF128_RATE;
-		kdf_squeeze(&state, &buf[pos], 1);
+		kdf_squeeze(&state, &buf[pos], KDF128_RATE);
 		int step = aigis_modified_reject_sampling(coeff, &cur, &buf[pos], len);
 		pos += step;
 		len -= step;
@@ -270,5 +267,5 @@ int main() {
             printf("diff at: %3d, a[%3d]=%04x, c[%3d]=%04x\n", i, i, a[i], i, c[i]);
         }
     }
-    return 0;
+    return 0*puts("no diff found.");
 }

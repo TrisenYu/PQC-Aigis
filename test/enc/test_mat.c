@@ -1,6 +1,6 @@
-#include "../poly.h"
-#include "../aigis_enc.h"
-#include "../debug.h"
+#include "../../poly.h"
+#include "../../aigis_enc.h"
+#include "../../debug.h"
 
 uint8_t seed[AIGIS_N], buf[2048];
 uint8_t buf1[2048], msg[AIGIS_SEED_SIZE] = "helloworld?!?!?!";
@@ -44,12 +44,12 @@ int main() {
 	enc_ntt_matr_act(c, mat, a);
 	enc_pvec_inv_ntt(c);
 	enc_pvec_add(c, c, b);
-	enc_pvec_nq_q(c);
-	enc_pvec_nq_q(a);
+	enc_pvec_shrink_q(c, enc_nq_q);
+	enc_pvec_shrink_q(a, enc_nq_q);
 
-	pack_pub(buf, c, seed);	
+	enc_pack_pub(buf, c, seed);	
 	// AIGIS_ENC_PUB_SIZE
-	pack_sec(buf1, a);
+	enc_pack_sec(buf1, a);
 	// for (int i = 0; i < AIGIS_ENC_SEC_SIZE; i ++) {
 	// 	printf("%02x", buf1[i]);
 	// 	if (!((i+1)&31)) { puts(""); }
@@ -57,7 +57,7 @@ int main() {
 
 	// dump_enc_pvec(c);
 	// dump_enc_pvec(a);
-	unpack_comp_pub(tpub, tsed, buf);
+	enc_unpack_pub(tpub, tsed, buf);
 	enc_pvec_ntt(tpub);
 	// unpack_comp_sec(tsec, buf1);
 	// dump_enc_pvec(c);
@@ -107,10 +107,10 @@ int main() {
 	enc_inv_ntt(cip_poly);
 	enc_poly_add(cip_poly, cip_poly, err_poly);
 	enc_poly_sub(cip_poly, cip_poly, msg_poly);
-	enc_poly_n2q_q(cip_poly);
-	enc_pvec_nq_q(b);
+	enc_poly_shrink_q(cip_poly, enc_n2q_q);
+	enc_pvec_shrink_q(b, enc_nq_q);
 
-	pack_ciphertext(buf, b, cip_poly);
+	enc_pack_ciphertext(buf, b, cip_poly);
 	/// 有点奇怪，做了这么久都对得上？
 	/// 那可能只有解密出错了
 
@@ -118,17 +118,18 @@ int main() {
 	// 	printf("%02x", buf[i]);
 	// 	if (!((i+1)&31)) { puts(""); }
 	// }
-	unpack_ciphertext(tb, tcip_poly, buf);
-	unpack_comp_sec(tsv, buf1);	
+	enc_unpack_ciphertext(tb, tcip_poly, buf);
+	enc_unpack_sec(tsv, buf1);	
 	enc_pvec_ntt(tb);
 	enc_inner_mul(tmsg_poly, tsv, tb);
 	enc_inv_ntt(tmsg_poly); /// TODO: 似乎是 ntt 出问题
 	enc_poly_sub(tmsg_poly, tmsg_poly, tcip_poly);
-	enc_poly_n2q_q(tmsg_poly);
+	enc_poly_shrink_q(tmsg_poly, enc_n2q_q);
 	enc_poly_to_msg(buf, tmsg_poly);
 	for (int i = 0; i < AIGIS_SEED_SIZE; i ++) {
 		printf("%c", buf[i]);
 	}
+	puts("");
 	// dump_enc_pvec(tsv);
 	// dump_enc_poly(tmsg_poly);
 	// dump_enc_pvec(tb);

@@ -1,4 +1,4 @@
-#include "../comp.h"
+#include "../../aigis_comp.h"
 
 int16_t test_po[AIGIS_N] = {
       100,   200,   300,   400,   500,   600,   700,   800,   900,  1000,  1100,  1201,  1301,  1402,  1503,  1607, 
@@ -60,7 +60,7 @@ int16_t now[AIGIS_N];
 int main() {
     printf("%d\n", AIGIS_ENC_BITS_CFT2);
     enc_cft_poly_compresser(buf, test_po);
-    for (int i = 0; i < AIGIS_COMP_CFT2_SIZE; i ++) {
+    for (int i = 0; i < AIGIS_ENC_COMP_CFT2_SIZE; i ++) {
         printf("%02x", buf[i]);
         if (!((i+1)&15)) { puts(""); }
     }
