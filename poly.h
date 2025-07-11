@@ -242,21 +242,20 @@ void sig_veck_lsh(sig_veck res, uint8_t k) {
 
 
 /// 生成多项式可用的 ntt 或 inv_ntt 函数
-#define generic_sig_vec_ntt_gen(attr, vec_name, boundary, fn_name)	\
-void attr##_##vec_name##_##fn_name(attr##_##vec_name res) {			\
-	for (int i = 0; i < boundary; i ++) {							\
-		attr##_##fn_name(res[i]);									\
-	}																\
+#define ring_vec_ntt_gen(attr, vec_name, boundary, fn_name)		\
+void attr##_##vec_name##_##fn_name(attr##_##vec_name res) {	\
+	for (int i = 0; i < boundary; i ++) {				   	\
+		attr##_##fn_name(res[i]);						   	\
+	}													   	\
 }
 
-generic_sig_vec_ntt_gen(sig, vecl, AIGIS_SIG_L, ntt);
-generic_sig_vec_ntt_gen(sig, vecl, AIGIS_SIG_L, inv_ntt);
-generic_sig_vec_ntt_gen(sig, veck, AIGIS_SIG_K, ntt);
-generic_sig_vec_ntt_gen(sig, veck, AIGIS_SIG_K, inv_ntt);
-generic_sig_vec_ntt_gen(enc, veck, AIGIS_ENC_K, ntt);
-generic_sig_vec_ntt_gen(enc, veck, AIGIS_ENC_K, inv_ntt);
-
-#undef generic_sig_vec_ntt_gen 
+ring_vec_ntt_gen(sig, vecl, AIGIS_SIG_L, ntt);
+ring_vec_ntt_gen(sig, vecl, AIGIS_SIG_L, inv_ntt);
+ring_vec_ntt_gen(sig, veck, AIGIS_SIG_K, ntt);
+ring_vec_ntt_gen(sig, veck, AIGIS_SIG_K, inv_ntt);
+ring_vec_ntt_gen(enc, veck, AIGIS_ENC_K, ntt);
+ring_vec_ntt_gen(enc, veck, AIGIS_ENC_K, inv_ntt);
+#undef ring_vec_ntt_gen 
 
 
 /// 多项式向量的加减及矩阵运算

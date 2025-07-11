@@ -5,11 +5,11 @@
 #ifndef __AIGIS_REJ_SAMP_H__
 #define __AIGIS_REJ_SAMP_H__
 
-#ifdef __DEBUG
-#include <stdio.h>
-extern void dump_u8arr(const uint8_t *a, uint64_t lena);
-extern void dump_sig_poly(const uint32_t a[AIGIS_N]);
-#endif //DEBUG
+// #ifdef __DEBUG
+// #include <stdio.h>
+// extern void dump_u8arr(const uint8_t *a, uint64_t lena);
+// extern void dump_sig_poly(const uint32_t a[AIGIS_N]);
+// #endif //DEBUG
 
 static uint16_t _8to16(uint8_t x) { return (uint16_t)(x); }
 
@@ -205,12 +205,6 @@ static void _sig_mat_qbits_22_mode(
 	} while (ctr < lena)
 
 	__samp_22bits(223);
-#ifdef __DEBUG
-	// for (int i = 0; i < AIGIS_N; i ++) {
-	// 	printf("%08x,", res_poly[i]);
-	// 	if (!((i+1)&15)) { puts(""); }
-	// }
-#endif
 	/* Probability we need more than 6 blocks to generate 225 elements: < 2^{-135}.*/
 	/* Probability we need more than 258 bytes to generate the last 31 elements: < 2^{-133}.*/
 	/// TODO: Goes in this if condition has a huge probability. 
@@ -228,12 +222,6 @@ static void _sig_mat_qbits_22_mode(
 	}
 	__samp_22bits(AIGIS_N);
 #undef __samp_22bits
-	// for (int i = 0; i < AIGIS_N; i ++) {
-	// 	printf("%08x,", res_poly[i]);
-	// 	if (!((i+1)&15)) {
-	// 		puts("");
-	// 	}
-	// }
 }
 
 void sig_rej_mat(
@@ -275,11 +263,6 @@ void sig_poly_eta_s_uniform(
 		out_buf, AIGIS_SIG_2_KDF256_RATE, 
 		inp_buf, AIGIS_SEED_SIZE+1+(!AIGIS_KDF_CONF)
 	);
-#ifdef __DEBUG
-	 // printf("%d %d\n", AIGIS_SIG_2_KDF256_RATE, AIGIS_SEED_SIZE+1+(!AIGIS_KDF_CONF));
-	 // puts("after kdf_xof256 in sig_poly_eta_s_uniform");
-	 // dump_u8arr(out_buf, AIGIS_SIG_2_KDF256_RATE);
-#endif //DEBUG
 	sig_rej_eta_s(res, out_buf, AIGIS_SIG_2_KDF256_RATE);
 	free(out_buf);
 }
@@ -304,19 +287,6 @@ void sig_poly_eta_e_uniform(
 		out_buf, AIGIS_SIG_2_KDF256_RATE, 
 		inp_buf, AIGIS_SEED_SIZE+1+(!AIGIS_KDF_CONF)
 	);
-
-#ifdef __DEBUG
-	 // printf("%d %d\n", AIGIS_SIG_2_KDF256_RATE, AIGIS_SEED_SIZE+1+(!AIGIS_KDF_CONF));
-	/*
-	puts("seed is");
-	for (int i = 0; i < AIGIS_SEED_SIZE+2; i ++) {
-		printf("%02x,", inp_buf[i]);
-		if (!((i+1)&15)) { puts(""); }
-	}
-	*/
-	// puts("\nafter kdf_xof256 in sig_poly_eta_e_uniform");
-	// dump_u8arr(out_buf, AIGIS_SIG_2_KDF256_RATE);
-#endif //DEBUG
 
 	switch (AIGIS_SIG_ETA_E) {
 	default:

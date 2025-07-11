@@ -63,7 +63,11 @@ static void sha_ke128_absorb(
     const uint8_t* inp, 
     size_t inlen
 ) {
-    keccak_absorb_once((uint64_t*)(self->buf), KDF200_SUB_32_RATE, inp, inlen, 0x1F);
+    keccak_absorb_once(
+		(uint64_t*)(self->buf), 
+		KDF200_SUB_32_RATE, 
+		inp, inlen, 0x1F
+	);
     self->cnt = KDF200_SUB_32_RATE;
 }
 static void sha_ke256_absorb(
@@ -71,7 +75,11 @@ static void sha_ke256_absorb(
     const uint8_t* inp, 
     size_t inlen
 ) {
-    keccak_absorb_once((uint64_t*)(self->buf), KDF200_SUB_64_RATE, inp, inlen, 0x1F);
+    keccak_absorb_once(
+		(uint64_t*)(self->buf), 
+		KDF200_SUB_64_RATE, 
+		inp, inlen, 0x1F
+	);
     self->cnt = KDF200_SUB_64_RATE;
 }
 
@@ -84,14 +92,15 @@ static void sm3_##name##_squeeze_blocks(					\
 ) {															\
 	nblocks *= expand_scale;								\
     uint8_t *nonce = self->buf;								\
-    uint64_t cnt = self->cnt, lena = nblocks;				\
+    uint64_t cnt = self->cnt, lena = nblocks,				\
+			 st_pos = self->len+SM3_STATE_CNT_SIZE;			\
 	uint8_t *rec = (uint8_t*)malloc(SM3_KDF_RATE+nblocks);	\
 	nblocks += SM3_KDF_RATE;								\
     while (nblocks > SM3_KDF_RATE) {						\
         for (int j = 0; j < 4; j ++) {						\
             nonce[j] = (cnt >> ((3 - j) << 3)) & 0xFF;		\
         }													\
-        sm3(nonce, self->len+SM3_STATE_CNT_SIZE, &rec[cnt*SM3_KDF_RATE]); \
+        sm3(nonce, st_pos, &rec[cnt*SM3_KDF_RATE]);			\
         cnt ++;												\
 		nblocks -= SM3_KDF_RATE;							\
     }														\
@@ -111,7 +120,10 @@ static void sm3_squeeze(
     uint8_t *res,
     uint64_t out_len
 ) {
-    sm3_extented(res, out_len, self->buf+SM3_STATE_CNT_SIZE, self->len);
+    sm3_extented(
+		res, out_len, 
+		self->buf+SM3_STATE_CNT_SIZE, self->len
+	);
 }
 
 static void sha_ke128_squeeze_blocks(
@@ -119,7 +131,10 @@ static void sha_ke128_squeeze_blocks(
     uint8_t *res,
     uint64_t nblocks
 ) {
-    keccak_squeezeblocks(res, nblocks, (uint64_t*)(self->buf), KDF200_SUB_32_RATE);
+    keccak_squeezeblocks(
+		res, nblocks, (uint64_t*)(self->buf), 
+		KDF200_SUB_32_RATE
+	);
 }
 
 static void sha_ke128_squeeze(
@@ -127,7 +142,10 @@ static void sha_ke128_squeeze(
     uint8_t *res,
     uint64_t out_len
 ) {
-    self->cnt = keccak_squeeze(res, out_len, (uint64_t*)(self->buf), self->cnt, KDF200_SUB_32_RATE);
+    self->cnt = keccak_squeeze(
+		res, out_len, (uint64_t*)(self->buf), 
+		self->cnt, KDF200_SUB_32_RATE
+	);
 }
 
 static void sha_ke256_squeeze_blocks(
@@ -135,7 +153,10 @@ static void sha_ke256_squeeze_blocks(
     uint8_t *res,
     uint64_t nblocks
 ) {
-    keccak_squeezeblocks(res, nblocks, (uint64_t*)(self->buf), KDF200_SUB_64_RATE);
+    keccak_squeezeblocks(
+		res, nblocks, (uint64_t*)(self->buf), 
+		KDF200_SUB_64_RATE
+	);
 }
 
 static void sha_ke256_squeeze(
@@ -143,7 +164,10 @@ static void sha_ke256_squeeze(
     uint8_t *res,
     uint64_t out_len
 ) {
-    self->cnt = keccak_squeeze(res, out_len, (uint64_t*)(self->buf), self->cnt, KDF200_SUB_64_RATE);
+    self->cnt = keccak_squeeze(
+		res, out_len, (uint64_t*)(self->buf), 
+		self->cnt, KDF200_SUB_64_RATE
+	);
 }
 
 

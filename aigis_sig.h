@@ -4,9 +4,6 @@
 #include "aigis_pack.h"
 #include "entropy/baby_png.h"
 
-#ifdef __DEBUG
-// #include "debug.h"
-#endif
 
 void sig_expand_mat(
 	sig_matr_kl mat,
@@ -150,7 +147,7 @@ int sig_keypair(
 	return sig_inner_keypair(res_pub, res_sec, coins);
 }
 
-/// 参考实现
+/// TODO: 写注释，理解清楚签名函数的步骤
 
 /*************************************************
 * Name:		crypto_sign_signature_internal
@@ -177,7 +174,7 @@ int crypto_sign_signature_internal(
 	const uint8_t *sec
 ) {
 	size_t i, j;
-	unsigned int n;
+	uint32_t n;
 	uint8_t *buf;
 	uint16_t nonce = 0;
 	sig_poly	*c	 = (sig_poly*)calloc(1, sizeof(sig_poly)),
@@ -197,18 +194,8 @@ int crypto_sign_signature_internal(
 				*ct0   = (sig_veck*)calloc(1, sizeof(sig_veck)),
 				*tmp   = (sig_veck*)calloc(1, sizeof(sig_veck));
 
-	// uint8_t should_die = 0;
   	buf = (uint8_t*)calloc(2*AIGIS_SEED_SIZE + AIGIS_CRH_SIZE + msg_len, 1);
 	sig_unpack_sec(buf, *s1, *s2, *t0, sec);
-
-#ifdef __DEBUG
-	// puts("s1");
-	// dump_sig_poly((*s1)[1]);
-	// puts("s2");
-	// dump_sig_poly((*s2)[1]);
-	// puts("t0");
-	// dump_sig_poly((*t0)[1]);
-#endif
 
 	for(i=0;i<msg_len;i++) {
 		buf[2*AIGIS_SEED_SIZE + AIGIS_CRH_SIZE + i] = msg[i];
@@ -239,23 +226,10 @@ back:
 			(*yhat)[i][j] = (*y)[i][j];
 		}
 	}
-#ifdef __DEBUG
-	// dump_sig_poly((*yhat)[1]);
-#endif
 	sig_vecl_ntt(*yhat);
 	sig_matr_kl_ntt_act(*w, *mat, *yhat);
-
 	sig_veck_try_shrink(*w, sig_try_shrink);
 	sig_veck_decomp(*tmp, *w1, *w);
-#ifdef __DEBUG
-	// puts("ct0");
-	// dump_sig_poly((*ct0)[1]);
-	// puts("w1");
-	// dump_sig_poly((*w1)[1]);
-	// puts("w");
-	// dump_sig_poly((*w)[1]);
-#endif
-
 	sig_challenge(*c, &buf[AIGIS_SEED_SIZE<<1], *w1);
 	for (j = 0; j < AIGIS_N; j ++) {
 		(*chat)[j] = (*c)[j];
@@ -287,13 +261,6 @@ back:
 			res |= (*tmp)[i][j] != (*w1)[i][j];
 		}
 	}
-#ifdef __DEBUG
-	// puts("wcs2");
-	// dump_sig_poly((*wcs2)[1]);
-	// puts("wcs20");
-	// dump_sig_poly((*wcs20)[1]);
-	// puts("------");
-#endif
 	if (res) {
 		goto back;
 	}
@@ -469,17 +436,6 @@ int crypto_sign_verify_internal(
 		ret = -1;
 		goto end;
 	}
-#ifdef __DEBUG
-	// puts("t1");
-	// dump_sig_poly((*t1)[1]);
-	// puts("h");
-	// dump_sig_poly((*h)[1]);
-	// puts("c");
-	// dump_sig_poly(*c);
-	// puts("z");
-	// dump_sig_poly((*z)[1]);
-	// printf("%d\n", ret);
-#endif //DEBUG
 	for (i = 0; i < AIGIS_SIG_L; i ++) {
 		ret |= sig_poly_check_norm((*z)[i], AIGIS_SIG_GAMMA1 - AIGIS_SIG_BETA1);
 	}
@@ -498,17 +454,6 @@ int crypto_sign_verify_internal(
 	kdf_xof256(buf, AIGIS_CRH_SIZE, pub, AIGIS_SIG_PUB_SIZE);
 	kdf_xof256(buf, AIGIS_CRH_SIZE, buf, AIGIS_CRH_SIZE + msg_len);
 	sig_expand_mat(*mat, rho);
-#ifdef __DEBUG
-	// puts("pub");
-	// dump_u8arr(pub, 64);
-	// puts("rho");
-	// dump_u8arr(rho, AIGIS_SEED_SIZE); 
-	// puts("mat");
-	// dump_sig_poly((*mat)[1][2]);
-	// puts("buf");
-	// dump_u8arr(buf, AIGIS_CRH_SIZE);
-	// puts("");
-#endif 
 	sig_vecl_ntt(*z);
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
 		sig_inner_mul_vecl((*tmp1)[i], (*mat)[i], *z);
@@ -518,17 +463,6 @@ int crypto_sign_verify_internal(
 	}
 	sig_ntt(*chat);
 	sig_veck_lsh(*t1, AIGIS_SIG_D);
-#ifdef __DEBUG
-	// puts("t1");
-	// dump_sig_poly((*t1)[1]);
-	// puts("rho");
-	// dump_u8arr(rho, AIGIS_SEED_SIZE); 
-	// puts("mat");
-	// dump_sig_poly((*mat)[1][2]);
-	// puts("buf");
-	// dump_u8arr(buf, AIGIS_CRH_SIZE);
-	// puts("");
-#endif 
 
 	sig_veck_ntt(*t1);
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
