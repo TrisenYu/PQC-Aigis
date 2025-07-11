@@ -23,17 +23,16 @@ typedef struct {
 
 /// 初始化函数
 // 注意，需要手动销毁 malloc 带来的影响
-static void init_sm3(aigis_kdf_state *res, size_t buf_size) {
-    res->buf = (uint8_t*)calloc(buf_size+SM3_STATE_CNT_SIZE, 1);
-    res->len = buf_size;
-    res->cnt = 0;
+#define init_gen(name, state_size)								 \
+static void init_##name(aigis_kdf_state *res, size_t buf_size) { \
+    res->buf = (uint8_t*)calloc(buf_size+state_size, 1);		 \
+    res->len = buf_size;										 \
+    res->cnt = 0;												 \
 }
 
-static void init_sha_ke(aigis_kdf_state *res, size_t buf_size) {
-    res->buf = (uint8_t*)calloc(buf_size+SHAKE_STATE_CNT_SIZE, 1);
-    res->len = buf_size; // 为了兼容sm3的设计
-    res->cnt = 0;
-}
+init_gen(sm3, SM3_STATE_CNT_SIZE);
+init_gen(sha_ke, SHAKE_STATE_CNT_SIZE);
+#undef init_gen
 
 /// 更改input_buf
 static void sm3_alter_inp_buf(
@@ -77,30 +76,30 @@ static void sha_ke256_absorb(
 }
 
 /// 压缩函数
-#define sm3_squeezer_blocks_gen(name, expand_scale) \
-static void sm3_##name##_squeeze_blocks(			\
-    aigis_kdf_state *self,				 			\
-    uint8_t *res,						 			\
-    uint64_t nblocks								\
-) {													\
-	nblocks *= expand_scale;						\
-    uint8_t *nonce = self->buf;						\
-    uint64_t cnt = self->cnt, lena = nblocks;		\
-	uint8_t *rec = (uint8_t*)malloc(SM3_KDF_RATE+nblocks); \
-	nblocks += SM3_KDF_RATE;						\
-    while (nblocks > SM3_KDF_RATE) {				\
-        for (int j = 0; j < 4; j ++) {				\
-            nonce[j] = (cnt >> ((3 - j) << 3)) & 0xFF; \
-        }											\
-        sm3(self->buf, self->len + SM3_STATE_CNT_SIZE, &rec[cnt*SM3_KDF_RATE]); \
-        cnt ++;										\
-		nblocks -= SM3_KDF_RATE;					\
-    }												\
-    self->cnt = cnt;								\
-	for (uint64_t i = 0; i < lena; i ++) {			\
-		res[i] = rec[i];							\
-	}												\
-	free(rec);										\
+#define sm3_squeezer_blocks_gen(name, expand_scale)			\
+static void sm3_##name##_squeeze_blocks(					\
+    aigis_kdf_state *self,				 					\
+    uint8_t *res,						 					\
+    uint64_t nblocks										\
+) {															\
+	nblocks *= expand_scale;								\
+    uint8_t *nonce = self->buf;								\
+    uint64_t cnt = self->cnt, lena = nblocks;				\
+	uint8_t *rec = (uint8_t*)malloc(SM3_KDF_RATE+nblocks);	\
+	nblocks += SM3_KDF_RATE;								\
+    while (nblocks > SM3_KDF_RATE) {						\
+        for (int j = 0; j < 4; j ++) {						\
+            nonce[j] = (cnt >> ((3 - j) << 3)) & 0xFF;		\
+        }													\
+        sm3(nonce, self->len+SM3_STATE_CNT_SIZE, &rec[cnt*SM3_KDF_RATE]); \
+        cnt ++;												\
+		nblocks -= SM3_KDF_RATE;							\
+    }														\
+    self->cnt = cnt;										\
+	for (uint64_t i = 0; i < lena; i ++) {					\
+		res[i] = rec[i];									\
+	}														\
+	free(rec);												\
 }
 
 sm3_squeezer_blocks_gen(128_sig, KDF200_SUB_32_RATE);
@@ -187,7 +186,7 @@ typedef void (*_kdf_absorb) (
 );
 typedef void (*_kdf_squeeze_blocks) (
     aigis_kdf_state*, 
-    uint8_t * /*res*/,
+    uint8_t* /*res*/,
     uint64_t /*nblocks*/
 );
 
@@ -214,9 +213,9 @@ typedef void (*_kdf_xof) (
 #if (AIGIS_KDF_CONF == 0) 
     _kdf_init				kdf_init = init_sm3;
     _kdf_alter_inp_buf		kdf_alter_inp_buf = sm3_alter_inp_buf;
+	_kdf_squeeze			kdf_squeeze = sm3_squeeze;
 
     _kdf_absorb				kdf128_absorb = sm3_absorb;
-	_kdf_squeeze			kdf_squeeze = sm3_squeeze;
     _kdf_squeeze_blocks 	kdf128_sig_squeeze_blocks = sm3_128_sig_squeeze_blocks;
 
     _kdf_absorb				kdf256_absorb = sm3_absorb;
@@ -233,9 +232,9 @@ typedef void (*_kdf_xof) (
 #elif (AIGIS_KDF_CONF == 1)
     _kdf_init				kdf_init = init_sha_ke;
     _kdf_alter_inp_buf		kdf_alter_inp_buf = NULL;
+    _kdf_squeeze			kdf_squeeze =			sha_ke128_squeeze;
 
     _kdf_absorb				kdf128_absorb = 		sha_ke128_absorb;
-    _kdf_squeeze			kdf_squeeze =			sha_ke128_squeeze;
     _kdf_squeeze_blocks		kdf128_sig_squeeze_blocks = sha_ke128_squeeze_blocks;
 
     _kdf_absorb				kdf256_absorb = 		sha_ke256_absorb;

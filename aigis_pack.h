@@ -9,7 +9,7 @@
 /// comp_pub := pub||seed
 void enc_pack_pub(
     uint8_t res_pub[AIGIS_ENC_PUB_SIZE],
-    const enc_pvec raw_pub,
+    const enc_veck raw_pub,
     const uint8_t *seed
 ) {
     int i = 0;
@@ -20,7 +20,7 @@ void enc_pack_pub(
 }
 /// 调用此函数解封公钥
 void enc_unpack_pub(
-    enc_pvec res_pub,
+    enc_veck res_pub,
     uint8_t *seed,
     const uint8_t comp_pub[AIGIS_ENC_PUB_SIZE]
 ) {
@@ -34,7 +34,7 @@ void enc_unpack_pub(
 /// 调用此函数封装私钥
 void enc_pack_sec(
     uint8_t res_sec[AIGIS_ENC_SEC_SIZE],
-    const enc_pvec raw_sec
+    const enc_veck raw_sec
 ) {
     int i = 0;
     for (; i < AIGIS_ENC_K; i ++) {
@@ -43,7 +43,7 @@ void enc_pack_sec(
 }
 /// 调用此函数解封私钥
 void enc_unpack_sec(
-    enc_pvec res_sec,
+    enc_veck res_sec,
     const uint8_t comp_sec[AIGIS_ENC_SEC_SIZE]
 ) {
     int i = 0;
@@ -55,20 +55,20 @@ void enc_unpack_sec(
 
 void enc_pack_ciphertext(
     uint8_t res[AIGIS_ENC_CFT_SIZE],
-    const enc_pvec cipher_vec1,
+    const enc_veck cipher_vec1,
     const enc_poly cipher_poly2
 ) {
-    enc_cft_pvec_compresser(res, cipher_vec1);
+    enc_cft_veck_compresser(res, cipher_vec1);
     enc_cft_poly_compresser(res+AIGIS_ENC_COMP_CFT_SIZE, cipher_poly2);
 }
 
 void enc_unpack_ciphertext(
-    enc_pvec res_pvec,
+    enc_veck res_veck,
     enc_poly res_poly,
     const uint8_t comp_cipher[AIGIS_ENC_CFT_SIZE]
 ) {
     enc_cft_poly_decompresser(res_poly, comp_cipher+AIGIS_ENC_COMP_CFT_SIZE);
-    enc_cft_pvec_decompresser(res_pvec, comp_cipher);
+    enc_cft_veck_decompresser(res_veck, comp_cipher);
 }
 
 

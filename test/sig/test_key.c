@@ -40,7 +40,7 @@ int main() {
 	// const unsigned char *msg, size_t msg_len,
 	// const unsigned char *pub
 	int ret = crypto_sign_verify_internal(sig, sig_len, msg, msg_len, pub);
-	printf("%d", ret);
+	printf("%d\n", ret);
 	return ret;
 }
 

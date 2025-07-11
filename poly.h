@@ -14,11 +14,11 @@ typedef uint32_t sig_poly[AIGIS_N]; // a_{0}+a_{1}X+...+a_{255}X^255 ~ (a0, a1, 
 /// enc_poly ~ int16_t*
 typedef int16_t  enc_poly[AIGIS_N]; // a_{0}+a_{1}X+...+a_{255}X^255 ~ (a0, a1, ..., a255)
 
-/// enc_pvec ~ int16_t**
-typedef enc_poly enc_pvec[AIGIS_ENC_K];
+/// enc_veck ~ int16_t**
+typedef enc_poly enc_veck[AIGIS_ENC_K];
 
 /// enc_matr ~ int16_t***
-typedef enc_pvec enc_matr[AIGIS_ENC_K];
+typedef enc_veck enc_matr[AIGIS_ENC_K];
 
 typedef sig_poly sig_vecl[AIGIS_SIG_L];
 typedef sig_poly sig_veck[AIGIS_SIG_K];
@@ -32,14 +32,13 @@ void enc_gen_matr(
 	const uint8_t* coins,
 	int trans
 ) {
-	int i = 0, j = 0;
+	int i = 0, j = 0, x, y;
 	uint8_t ext_seed[AIGIS_SEED_SIZE+2];
 	for (; i < AIGIS_SEED_SIZE; i ++) {
 		ext_seed[i] = coins[i];
 	}
 	for (i = 0; i < AIGIS_ENC_K; i ++) {
 		for (j = 0; j < AIGIS_ENC_K; j ++) {
-			int x, y;
 			trans ? (x = j, y = i) : (x = i, y = j);
 			ext_seed[AIGIS_SEED_SIZE+0] = x;
 			ext_seed[AIGIS_SEED_SIZE+1] = y;
@@ -49,8 +48,8 @@ void enc_gen_matr(
 }
 /// eta_scale 只能是 AIGIS_ENC_ETA_E_INP_SIZE
 ///			   或 AIGIS_ENC_ETA_S_INP_SIZE
-int enc_gen_pvec_via_noise(
-	enc_pvec res,
+int enc_gen_veck_via_noise(
+	enc_veck res,
 	size_t eta_scale,   // x * 64
 	const uint8_t *seed,
 	uint8_t nonce
@@ -88,37 +87,39 @@ void enc_gen_poly_in_eta_e(
 }
 
 /// 多项式环上元素的加减以及频域点乘
-
-void enc_poly_sub(
-	enc_poly res,
-	const enc_poly a,
-	const enc_poly b
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = a[i] - b[i];
-	}
+#define ring_addition(type_name, mod_val, op_name, op)	\
+void type_name##_##op_name(								\
+	type_name res,										\
+	const type_name a,									\
+	const type_name b									\
+) {														\
+	for (int i = 0; i < AIGIS_N; i ++) {				\
+		res[i] = mod_val + a[i] op b[i];				\
+	}													\
 }
 
-void enc_poly_add(
-	enc_poly res,
-	const enc_poly a,
-	const enc_poly b
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = a[i] + b[i];
-	}
+ring_addition(enc_poly, 0, add, +);
+ring_addition(enc_poly, 0, sub, -);
+ring_addition(sig_poly, 0, add, +);
+ring_addition(sig_poly, AIGIS_SIG_MOD_Q*2, sub, -);
+#undef ring_addition
+
+/// 多项式点乘
+#define poly_dot_mul_gen(ty, midval_ty, mont_val)				\
+void ty##_poly_dot_mul(											\
+	ty##_poly res,												\
+	const ty##_poly ntt_a,										\
+	const ty##_poly ntt_b										\
+) {																\
+	for (int i = 0; i < AIGIS_N; i ++) {						\
+		midval_ty tmp = ty##_mont_reduce(mont_val * ntt_a[i]);	\
+		res[i] = ty##_mont_reduce(tmp * ntt_b[i]);				\
+	}															\
 }
 
-void enc_poly_dot_mul(
-	enc_poly res,
-	const enc_poly ntt_a,
-	const enc_poly ntt_b
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		int32_t tmp = enc_mont_reduce(AIGIS_ENC_POW_2_32_Q * ntt_b[i]);
-		res[i] = enc_mont_reduce(tmp * ntt_a[i]);
-	}
-}
+poly_dot_mul_gen(enc, int32_t, AIGIS_ENC_POW_2_32_Q);
+poly_dot_mul_gen(sig, uint64_t, AIGIS_SIG_POW_2_64_Q);
+#undef poly_dot_mul_gen
 
 
 void enc_poly_shrink_q(
@@ -130,6 +131,14 @@ void enc_poly_shrink_q(
 	}
 }
 
+void sig_poly_shrink(
+	sig_poly res,
+	uint32_t (*shrink_fn)(uint32_t a)
+) {
+	for (int i = 0; i < AIGIS_N; i ++) {
+		res[i] = shrink_fn(res[i]);
+	}
+}
 
 /// 加解密相关函数
 void enc_poly_from_msg(
@@ -155,58 +164,20 @@ void enc_poly_to_msg(
 	for (i = 0; i < AIGIS_SEED_SIZE; i++) {
 		msg[i] = 0;
 		for (j = 0; j < 8; j++) {
-			t = (((a[8*i+j]<<1) + (AIGIS_ENC_MOD_Q>>1))/AIGIS_ENC_MOD_Q) & 1;
+			// TODO: 注意到这里用了除法
+			t = (((a[8*i+j]<<1)+(AIGIS_ENC_MOD_Q>>1))/AIGIS_ENC_MOD_Q) & 1;
 			msg[i] |= t << j;
 		}
 	}
 }
 
 // 签名算法所用的多项式
-void sig_poly_dot_mul(
-	sig_poly res,
-	const sig_poly ntt_a,
-	const sig_poly ntt_b
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		uint64_t tmp = sig_mont_reduce(AIGIS_SIG_POW_2_64_Q * ntt_b[i]);
-		res[i] = sig_mont_reduce(tmp * ntt_a[i]);
-	}
-}
-
-void sig_poly_add(
-	sig_poly res,
-	const sig_poly a,
-	const sig_poly b
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = a[i] + b[i];
-	}
-}
-
-void sig_poly_sub(
-	sig_poly res,
-	const sig_poly a,
-	const sig_poly b
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = AIGIS_SIG_MOD_Q*2 + a[i] - b[i];
-	}
-}
-
 void sig_poly_neg(sig_poly res) {
 	for (int i = 0; i < AIGIS_N; i ++) {
 		res[i] = AIGIS_SIG_MOD_Q*2 - res[i];
 	}
 }
 
-void sig_poly_shrink(
-	sig_poly res,
-	uint32_t (*shrink_fn)(uint32_t a)
-) {
-	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = shrink_fn(res[i]);
-	}
-}
 
 // lsh := left shift
 void sig_poly_lsh(sig_poly res, uint8_t k) {
@@ -215,10 +186,7 @@ void sig_poly_lsh(sig_poly res, uint8_t k) {
 	}
 }
 
-uint8_t sig_poly_check_norm(
-	const sig_poly a,
-	uint32_t B
-) {
+uint8_t sig_poly_check_norm(const sig_poly a, uint32_t B) {
 	int32_t t;
 	const int32_t x = ((AIGIS_SIG_MOD_Q-1)>>1);
 	for (int i = 0; i < AIGIS_N; i ++) {
@@ -228,16 +196,6 @@ uint8_t sig_poly_check_norm(
 		if ((uint32_t)t >= B) { return 1; }
 	}
 	return 0;
-}
-
-void sig_veck_sub(
-	sig_veck res,
-	const sig_veck a,
-	const sig_veck b
-) {
-	for (int i = 0; i < AIGIS_SIG_K; i ++) {
-		sig_poly_sub(res[i], a[i], b[i]);
-	}
 }
 
 void sig_veck_pow2round(sig_veck r0, sig_veck r1) {
@@ -276,27 +234,14 @@ void sig_veck_use_hint(
 }
 
 
-void sig_veck_lsh(
-	sig_veck res,
-	uint8_t k
-) {
+void sig_veck_lsh(sig_veck res, uint8_t k) {
 	for (int i = 0; i < AIGIS_SIG_K; i ++) {
 		sig_poly_lsh(res[i], k);
 	}
 }
 
 
-void sig_veck_add(
-	sig_veck res,
-	const sig_veck a,
-	const sig_veck b
-) {
-	for (int i = 0; i < AIGIS_SIG_K; i ++) {
-		sig_poly_add(res[i], a[i], b[i]);
-	}
-
-}
-
+/// 生成多项式可用的 ntt 或 inv_ntt 函数
 #define generic_sig_vec_ntt_gen(attr, vec_name, boundary, fn_name)	\
 void attr##_##vec_name##_##fn_name(attr##_##vec_name res) {			\
 	for (int i = 0; i < boundary; i ++) {							\
@@ -308,35 +253,33 @@ generic_sig_vec_ntt_gen(sig, vecl, AIGIS_SIG_L, ntt);
 generic_sig_vec_ntt_gen(sig, vecl, AIGIS_SIG_L, inv_ntt);
 generic_sig_vec_ntt_gen(sig, veck, AIGIS_SIG_K, ntt);
 generic_sig_vec_ntt_gen(sig, veck, AIGIS_SIG_K, inv_ntt);
-generic_sig_vec_ntt_gen(enc, pvec, AIGIS_ENC_K, ntt);
-generic_sig_vec_ntt_gen(enc, pvec, AIGIS_ENC_K, inv_ntt);
+generic_sig_vec_ntt_gen(enc, veck, AIGIS_ENC_K, ntt);
+generic_sig_vec_ntt_gen(enc, veck, AIGIS_ENC_K, inv_ntt);
 
 #undef generic_sig_vec_ntt_gen 
 
-void sig_veck_try_shrink(
-	sig_veck res,
-	uint32_t (*shrink_fn)(uint32_t a)
-) {
-	for (int i = 0; i < AIGIS_SIG_K; i ++) {
-		sig_poly_shrink(res[i], shrink_fn);
-	}
-}
-
 
 /// 多项式向量的加减及矩阵运算
-void enc_pvec_add(
-	enc_pvec res,
-	const enc_pvec a,
-	const enc_pvec b
-) {
-	for (int i = 0; i < AIGIS_ENC_K; i ++) {
-		enc_poly_add(res[i], a[i], b[i]);
-	}
+#define ring_vec_addition_gen(vec_name, op, boundary, poly_name)	\
+void vec_name##_##op(												\
+	vec_name res,													\
+	const vec_name a, 												\
+	const vec_name b												\
+) {																	\
+	for (int i = 0; i < boundary; i ++) {							\
+		poly_name##_##op(res[i], a[i], b[i]);						\
+	}																\
 }
 
-void enc_pvec_add_poly(
-	enc_pvec res,
-	const enc_pvec a,
+ring_vec_addition_gen(enc_veck, add, AIGIS_ENC_K, enc_poly);
+ring_vec_addition_gen(sig_veck, add, AIGIS_SIG_K, sig_poly);
+ring_vec_addition_gen(sig_veck, sub, AIGIS_SIG_K, sig_poly);
+#undef ring_vec_addition_gen
+
+
+void enc_veck_add_poly(
+	enc_veck res,
+	const enc_veck a,
 	const enc_poly b
 ) {
 	for (int i = 0; i < AIGIS_ENC_K; i ++) {
@@ -345,10 +288,10 @@ void enc_pvec_add_poly(
 }
 
 
-void enc_pvec_mul(
-	enc_pvec res,
-	enc_pvec ntt_a,
-	enc_pvec ntt_b
+void enc_veck_mul(
+	enc_veck res,
+	enc_veck ntt_a,
+	enc_veck ntt_b
 ) {
 	for (int i = 0; i < AIGIS_ENC_K; i ++) {
 		enc_poly_dot_mul(res[i], ntt_a[i], ntt_b[i]);
@@ -358,8 +301,8 @@ void enc_pvec_mul(
 
 void enc_inner_mul(
 	enc_poly res,
-	const enc_pvec a,
-	const enc_pvec b
+	const enc_veck a,
+	const enc_veck b
 ) {
 	for (int i = 0; i < AIGIS_N; i ++) {
 		int32_t tmp = enc_mont_reduce(AIGIS_ENC_POW_2_32_Q * b[0][i]);
@@ -371,27 +314,6 @@ void enc_inner_mul(
 		res[i] = enc_barr_reduce(res[i]);
 	}
 }
-
-void enc_ntt_matr_act(
-	enc_pvec res,
-	const enc_matr ntt_a,
-	const enc_pvec ntt_b
-) {
-	for (int i = 0; i < AIGIS_ENC_K; i ++) {
-		enc_inner_mul(res[i], ntt_a[i], ntt_b);
-	}
-}
-
-void enc_pvec_shrink_q(
-	enc_pvec res,
-	int16_t (*shrink_fn)(int16_t a)
-) {
-	for (int i = 0; i < AIGIS_ENC_K; i ++) {
-		enc_poly_shrink_q(res[i], shrink_fn);
-	}
-}
-
-
 
 void sig_inner_mul_vecl(
 	sig_poly res,
@@ -409,6 +331,16 @@ void sig_inner_mul_vecl(
 	}
 }
 
+void enc_ntt_matr_act(
+	enc_veck res,
+	const enc_matr ntt_a,
+	const enc_veck ntt_b
+) {
+	for (int i = 0; i < AIGIS_ENC_K; i ++) {
+		enc_inner_mul(res[i], ntt_a[i], ntt_b);
+	}
+}
+
 void sig_matr_kl_ntt_act(
 	sig_veck res,
 	const sig_matr_kl mat,
@@ -420,13 +352,33 @@ void sig_matr_kl_ntt_act(
 	}
 }
 
+void enc_veck_shrink_q(
+	enc_veck res,
+	int16_t (*shrink_fn)(int16_t a)
+) {
+	for (int i = 0; i < AIGIS_ENC_K; i ++) {
+		enc_poly_shrink_q(res[i], shrink_fn);
+	}
+}
+
+void sig_veck_try_shrink(
+	sig_veck res,
+	uint32_t (*shrink_fn)(uint32_t a)
+) {
+	for (int i = 0; i < AIGIS_SIG_K; i ++) {
+		sig_poly_shrink(res[i], shrink_fn);
+	}
+}
+
+
+
 void sig_poly_decomp(
 	sig_poly r0,
 	sig_poly r1,
 	const sig_poly a
 ) {
-	for (int j = 0; j < AIGIS_N; j ++) {
-		decompose(a[j], &r0[j], &r1[j]);
+	for (int i = 0; i < AIGIS_N; i ++) {
+		decompose(a[i], &r0[i], &r1[i]);
 	}
 }
 

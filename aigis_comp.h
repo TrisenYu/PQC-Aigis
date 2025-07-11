@@ -139,9 +139,9 @@ static void decomp_poly_7(
 
 
 
-static void comp_pvec_9(
+static void comp_veck_9(
 	uint8_t *res, 
-	const enc_pvec a 
+	const enc_veck a 
 ) {
     int i = 0, j, k;
 	uint16_t t[8], cpbytes = ((AIGIS_N * 9) >> 3);
@@ -165,9 +165,9 @@ static void comp_pvec_9(
 	}
 }
 
-static void comp_pvec_10(
+static void comp_veck_10(
 	uint8_t *res, 
-	const enc_pvec a 
+	const enc_veck a 
 ) {
     int i = 0, j, k;
 	uint16_t t[4];
@@ -187,9 +187,9 @@ static void comp_pvec_10(
     }
 }
 
-static void comp_pvec_11(
+static void comp_veck_11(
 	uint8_t *res, 
-	const enc_pvec a
+	const enc_veck a
 ) {
     int i = 0, j, k;
 	uint16_t t[8],
@@ -217,8 +217,8 @@ static void comp_pvec_11(
 	}
 }
 
-static void decomp_pvec_9(
-	enc_pvec res, 
+static void decomp_veck_9(
+	enc_veck res, 
 	const uint8_t *a
 ) {
 	int i = 0, j;
@@ -239,8 +239,8 @@ static void decomp_pvec_9(
 	}
 }
 
-static void decomp_pvec_10(
-	enc_pvec res, 
+static void decomp_veck_10(
+	enc_veck res, 
 	const uint8_t *a
 ) {
 	int i = 0, j;
@@ -259,8 +259,8 @@ static void decomp_pvec_10(
 	}
 }
 
-static void decomp_pvec_11(
-	enc_pvec res, 
+static void decomp_veck_11(
+	enc_veck res, 
 	const uint8_t *a
 ) {
 	int i = 0, j;
@@ -321,14 +321,14 @@ void enc_bytes2poly(enc_poly res, const uint8_t *a) {
 /// 在下面选择相应的配置
 void (*enc_pub_compresser) (
     uint8_t *res, 
-    const enc_pvec a 
+    const enc_veck a 
 ) = 
 #if AIGIS_ENC_BITS_PUB == 9
-    comp_pvec_9;
+    comp_veck_9;
 #elif AIGIS_ENC_BITS_PUB == 10
-    comp_pvec_10;
+    comp_veck_10;
 #elif AIGIS_ENC_BITS_PUB == 11
-    comp_pvec_11;
+    comp_veck_11;
 #else
     #error "unsupported config on AIGIS_ENC_BITS_PUB, " \
            "only accept {9, 10, 11}!"
@@ -336,45 +336,45 @@ void (*enc_pub_compresser) (
 
 
 void (*enc_pub_decompresser) (
-    enc_pvec res, 
+    enc_veck res, 
     const uint8_t *a
 ) = 
 #if AIGIS_ENC_BITS_PUB == 9
-    decomp_pvec_9;
+    decomp_veck_9;
 #elif AIGIS_ENC_BITS_PUB == 10
-    decomp_pvec_10;
+    decomp_veck_10;
 #elif AIGIS_ENC_BITS_PUB == 11
-    decomp_pvec_11;
+    decomp_veck_11;
 #else
     #error "unsupported config on AIGIS_ENC_BITS_PUB, " \
            "only accept {9, 10, 11}!"
 #endif  // check AIGIS_ENC_BITS_PUB for pub_decompresser
 
-void (*enc_cft_pvec_compresser) (
+void (*enc_cft_veck_compresser) (
 	uint8_t *res, 
-    const enc_pvec a
+    const enc_veck a
 ) = 
 #if AIGIS_ENC_BITS_CFT == 9
-	comp_pvec_9;
+	comp_veck_9;
 #elif AIGIS_ENC_BITS_CFT == 10
-    comp_pvec_10;
+    comp_veck_10;
 #elif AIGIS_ENC_BITS_CFT == 11
-    comp_pvec_11;
+    comp_veck_11;
 #else
     #error "unsupported config on AIGIS_ENC_BITS_CFT, " \
            "only accept {9, 10, 11}!"
 #endif // check AIGIS_ENC_BITS_CFT for aigis_cipher_compresser
 
-void (*enc_cft_pvec_decompresser) (
-	enc_pvec a, 
+void (*enc_cft_veck_decompresser) (
+	enc_veck a, 
     const uint8_t *res
 ) = 
 #if AIGIS_ENC_BITS_CFT == 9
-	decomp_pvec_9;
+	decomp_veck_9;
 #elif AIGIS_ENC_BITS_CFT == 10
-    decomp_pvec_10;
+    decomp_veck_10;
 #elif AIGIS_ENC_BITS_CFT == 11
-    decomp_pvec_11;
+    decomp_veck_11;
 #else
     #error "unsupported config on AIGIS_ENC_BITS_CFT, " \
            "only accept {9, 10, 11}!"

@@ -14,7 +14,7 @@ void dump_enc_poly(const enc_poly a) {
     puts("");
 }
 
-void dump_enc_pvec(const enc_pvec a) {
+void dump_enc_veck(const enc_veck a) {
     for (int i = 0; i < AIGIS_ENC_K; i ++) {
 		printf("%d:|\n", i);
         dump_enc_poly(a[i]);
