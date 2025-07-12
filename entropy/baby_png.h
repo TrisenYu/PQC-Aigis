@@ -1,5 +1,5 @@
-#ifndef __BABY_PRG_H__
-#define __BABY_PRG_H__
+/// Last modified at 2025年07月12日 星期六 14时46分59秒
+#include <stdlib.h>
 
 #if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
@@ -15,6 +15,8 @@
     #include <sys/syscall.h>
 #endif // linux check
 
+#ifndef __BABY_PRG_H__
+#define __BABY_PRG_H__
 
 #if defined(_WIN32) || defined(_WIN64)
     void randombytes(uint8_t *out, size_t outlen) {

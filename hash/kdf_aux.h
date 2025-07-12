@@ -1,6 +1,7 @@
-#include "hash/sm3/sm3.h"
-#include "hash/sm3/kdf.h"
-#include "hash/keccak/fips202.h"
+/// Last modified at 2025年07月12日 星期六 14时38分30秒
+#include "sm3/sm3.h"
+#include "sm3/kdf.h"
+#include "keccak/fips202.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -84,31 +85,31 @@ static void sha_ke256_absorb(
 }
 
 /// 压缩函数
-#define sm3_squeezer_blocks_gen(name, expand_scale)			\
-static void sm3_##name##_squeeze_blocks(					\
-    aigis_kdf_state *self,				 					\
-    uint8_t *res,						 					\
-    uint64_t nblocks										\
-) {															\
-	nblocks *= expand_scale;								\
-    uint8_t *nonce = self->buf;								\
-    uint64_t cnt = self->cnt, lena = nblocks,				\
-			 st_pos = self->len+SM3_STATE_CNT_SIZE;			\
-	uint8_t *rec = (uint8_t*)malloc(SM3_KDF_RATE+nblocks);	\
-	nblocks += SM3_KDF_RATE;								\
-    while (nblocks > SM3_KDF_RATE) {						\
-        for (int j = 0; j < 4; j ++) {						\
-            nonce[j] = (cnt >> ((3 - j) << 3)) & 0xFF;		\
-        }													\
-        sm3(nonce, st_pos, &rec[cnt*SM3_KDF_RATE]);			\
-        cnt ++;												\
-		nblocks -= SM3_KDF_RATE;							\
-    }														\
-    self->cnt = cnt;										\
-	for (uint64_t i = 0; i < lena; i ++) {					\
-		res[i] = rec[i];									\
-	}														\
-	free(rec);												\
+#define sm3_squeezer_blocks_gen(name, expand_scale)		\
+static void sm3_##name##_squeeze_blocks(				\
+    aigis_kdf_state *self,				 				\
+    uint8_t *res,						 				\
+    uint64_t nblocks									\
+) {														\
+	nblocks *= expand_scale;							\
+    uint8_t *nonce = self->buf;							\
+    uint64_t cnt = self->cnt, lena = nblocks,			\
+			 st_pos = self->len+SM3_STATE_CNT_SIZE;		\
+	uint8_t *rec = (uint8_t*)malloc(SM3_KDF_RATE);		\
+	nblocks += SM3_KDF_RATE;							\
+    while (nblocks > SM3_KDF_RATE) {					\
+        for (int j = 0; j < 4; j ++) {					\
+            nonce[j] = (cnt >> ((3 - j) << 3)) & 0xFF;	\
+        }												\
+        sm3(nonce, st_pos, rec);						\
+		nblocks -= SM3_KDF_RATE;						\
+		uint64_t choice = nblocks >= SM3_KDF_RATE ?		\
+						  SM3_KDF_RATE : nblocks;		\
+		memcpy(res+cnt*SM3_KDF_RATE, rec, choice);		\
+        cnt ++;											\
+    }													\
+    self->cnt = cnt;									\
+	free(rec);											\
 }
 
 sm3_squeezer_blocks_gen(128_sig, KDF200_SUB_32_RATE);
@@ -235,14 +236,14 @@ typedef void (*_kdf_xof) (
 );
 
 #if (AIGIS_KDF_CONF == 0) 
-    _kdf_init				kdf_init = init_sm3;
-    _kdf_alter_inp_buf		kdf_alter_inp_buf = sm3_alter_inp_buf;
-	_kdf_squeeze			kdf_squeeze = sm3_squeeze;
+    _kdf_init				kdf_init			=		init_sm3;
+    _kdf_alter_inp_buf		kdf_alter_inp_buf	= 		sm3_alter_inp_buf;
+	_kdf_squeeze			kdf_squeeze			= 		sm3_squeeze;
 
-    _kdf_absorb				kdf128_absorb = sm3_absorb;
+    _kdf_absorb				kdf128_absorb		=		sm3_absorb;
     _kdf_squeeze_blocks 	kdf128_sig_squeeze_blocks = sm3_128_sig_squeeze_blocks;
 
-    _kdf_absorb				kdf256_absorb = sm3_absorb;
+    _kdf_absorb				kdf256_absorb		=		sm3_absorb;
     _kdf_squeeze_blocks 	kdf256_sig_squeeze_blocks = sm3_256_sig_squeeze_blocks;
 
     _hash_x hash_h = sm3_256;
@@ -255,13 +256,13 @@ typedef void (*_kdf_xof) (
     #define KDF256_RATE 32 
 #elif (AIGIS_KDF_CONF == 1)
     _kdf_init				kdf_init = init_sha_ke;
-    _kdf_alter_inp_buf		kdf_alter_inp_buf = NULL;
-    _kdf_squeeze			kdf_squeeze =			sha_ke128_squeeze;
+    _kdf_alter_inp_buf		kdf_alter_inp_buf	=		NULL;
+    _kdf_squeeze			kdf_squeeze			=		sha_ke128_squeeze;
 
-    _kdf_absorb				kdf128_absorb = 		sha_ke128_absorb;
+    _kdf_absorb				kdf128_absorb		= 		sha_ke128_absorb;
     _kdf_squeeze_blocks		kdf128_sig_squeeze_blocks = sha_ke128_squeeze_blocks;
 
-    _kdf_absorb				kdf256_absorb = 		sha_ke256_absorb;
+    _kdf_absorb				kdf256_absorb		= 		sha_ke256_absorb;
     _kdf_squeeze_blocks 	kdf256_sig_squeeze_blocks = sha_ke256_squeeze_blocks;
 
     _hash_x hash_h = sha3_256;

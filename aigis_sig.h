@@ -1,5 +1,6 @@
+/// Last modified at 2025年07月12日 星期六 14时33分10秒
 /// 用于存放签名算法
-#include "poly.h"
+#include "aigis_poly.h"
 #include "samplers/rej_samp.h"
 #include "aigis_pack.h"
 #include "entropy/baby_png.h"
@@ -9,14 +10,12 @@ void sig_expand_mat(
 	sig_matr_kl mat,
 	const uint8_t rho[AIGIS_SEED_SIZE]
 ) {
-	uint32_t i = 0, j, pos, cnt;
+	uint32_t i = 0, j = 0;
 	uint8_t inp_buf[AIGIS_SEED_SIZE+2],
 			*out_buf = (uint8_t*)calloc(AIGIS_SIG_EXP_MATR_SIZE, 1);
 
-	for (; i < AIGIS_SEED_SIZE; i ++) {
-		inp_buf[i] = rho[i];
-	}
-	for (i = 0; i < AIGIS_SIG_K; i ++) {
+	memcpy(inp_buf, rho, AIGIS_SEED_SIZE);
+	for (; i < AIGIS_SIG_K; i ++) {
 		for (j = 0; j < AIGIS_SIG_L; j ++) {
 			inp_buf[AIGIS_SEED_SIZE] = i + (j<<4);
 			sig_rej_mat(mat[i][j], out_buf, inp_buf);
@@ -119,6 +118,7 @@ int sig_inner_keypair(
 	free(s2);
 	free(t1);
 	free(t0);
+	free(mat);
 	return 0;
 }
 
@@ -424,7 +424,7 @@ int crypto_sign_verify_internal(
 				*h  = (sig_veck*)malloc(sizeof(sig_veck)),
 				*tmp1 = (sig_veck*)malloc(sizeof(sig_veck)),
 				*tmp2 = (sig_veck*)malloc(sizeof(sig_veck));
-
+	buf = (uint8_t*)calloc(AIGIS_CRH_SIZE + msg_len, 1);
 	int ret = 0;
 
 	if (sig_len < AIGIS_SIG_SIG_SIZE) {
@@ -440,11 +440,6 @@ int crypto_sign_verify_internal(
 		ret |= sig_poly_check_norm((*z)[i], AIGIS_SIG_GAMMA1 - AIGIS_SIG_BETA1);
 	}
 	if (ret){
-		ret = -1;
-		goto end;
-	}
-	buf = (uint8_t*)calloc(AIGIS_CRH_SIZE + msg_len, 1);
-	if (buf == NULL) {
 		ret = -1;
 		goto end;
 	}
@@ -481,8 +476,8 @@ int crypto_sign_verify_internal(
 			break;
 		}
 	}
-	free(buf);
 end:
+	free(buf);
 	free(c);
 	free(chat);
 	free(cp);
@@ -534,7 +529,8 @@ int crypto_sign_verify(
 	}
 	memcpy(m_extended + 2 + ctx_len, m, msg_len);
 
-	int ret = crypto_sign_verify_internal(
+	int ret = 0;
+	ret = crypto_sign_verify_internal(
 		sig, sig_len, m_extended,
 		msg_len + ctx_len + 2, pub
 	);
@@ -567,12 +563,11 @@ int crypto_sign_open(
 	size_t ctx_len,
 	const uint8_t *pub
 ) {
-	size_t i;
 
 #define clean_msg 						\
 	do { 								\
 		*msg_len = -1;					\
-		for(i = 0; i < smsg_len; ++i) { \
+		for (int i = 0; i < smsg_len; ++i) { \
 			msg[i] = 0;					\
 		}								\
 	} while(0)
@@ -582,7 +577,8 @@ int crypto_sign_open(
 		return -1;
 	}
   	*msg_len = smsg_len - AIGIS_SIG_SIG_SIZE;
-	int ret = crypto_sign_verify(
+	int ret = 0;
+	ret = crypto_sign_verify(
 		sig_msg, AIGIS_SIG_SIG_SIZE,
 		sig_msg + AIGIS_SIG_SIG_SIZE,
 		*msg_len, ctx, ctx_len, pub
@@ -594,7 +590,7 @@ int crypto_sign_open(
 #undef clean_msg
 
 	/* All good, copy msg, return 0 */
-	for (i = 0; i < *msg_len; ++i) {
+	for (int i = 0; i < *msg_len; ++i) {
 		msg[i] = sig_msg[AIGIS_SIG_SIG_SIZE + i];
 	}
 	return 0;

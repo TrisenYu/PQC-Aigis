@@ -1,6 +1,9 @@
+/// Last modified at 2025年07月12日 星期六 14时45分55秒
 #include "../../aigis_const.h"
 #include "../../debug.h"
 #include "../../entropy/baby_png.h"
+
+#include <string.h>
 
 #if (AIGIS_SIG_ETA_E == 3) 
 	#define __SIG_ETA_E_MASK 0x7

@@ -1,5 +1,6 @@
+/// Last modified at 2025年07月12日 星期六 14时39分03秒
 #include "../aigis_const.h"
-#include "../kdf_aux.h"
+#include "../hash/kdf_aux.h"
 #include <stdint.h>
 
 #ifndef __AIGIS_REJ_SAMP_H__

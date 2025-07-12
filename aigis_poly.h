@@ -1,4 +1,4 @@
-
+/// Last modified at 2025年07月12日 星期六 14时36分20秒
 
 #include "aigis_const.h"
 #include "ntt.h"
@@ -187,10 +187,9 @@ void sig_poly_lsh(sig_poly res, uint8_t k) {
 }
 
 uint8_t sig_poly_check_norm(const sig_poly a, uint32_t B) {
-	int32_t t;
 	const int32_t x = ((AIGIS_SIG_MOD_Q-1)>>1);
 	for (int i = 0; i < AIGIS_N; i ++) {
-		t = x - a[i];
+		int32_t t = x - a[i];
 		t ^= (t >> 31);
 		t = x - t;
 		if ((uint32_t)t >= B) { return 1; }

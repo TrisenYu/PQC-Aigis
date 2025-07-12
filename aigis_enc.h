@@ -1,9 +1,10 @@
+/// Last modified at 2025年07月12日 星期六 14时38分54秒
 #include "aigis_const.h"
 #include "ntt.h"
-#include "kdf_aux.h"
+#include "hash/kdf_aux.h"
 #include "entropy/baby_png.h"
 
-#include "poly.h"
+#include "aigis_poly.h"
 
 #include "aigis_comp.h"
 #include "aigis_pack.h"

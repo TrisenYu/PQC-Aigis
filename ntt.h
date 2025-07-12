@@ -1,9 +1,10 @@
+/// Last modified at 2025年07月12日 星期六 14时40分24秒
 
 /// Author: <kisfg@hotmail.com, 2025-06>
 #include "aigis_const.h"
 #include "reduce.h"
-#ifndef __AIGIS_NTT__
-#define __AIGIS_NTT__
+#ifndef __AIGIS_NTT_H__
+#define __AIGIS_NTT_H__
 
 
 static const int16_t 
@@ -345,4 +346,4 @@ void sig_inv_ntt(uint32_t a[AIGIS_N]) {
 		a[step] = sig_mont_reduce(AIGIS_SIG_POW_2_24_Q * a[step]);
 	}
 }
-#endif // AIGIS_NTT
+#endif // AIGIS_NTT_H

@@ -1,3 +1,4 @@
+/// Last modified at 2025年07月12日 星期六 14时07分29秒
 #include "../../aigis_sig.h"
 #include "../../entropy/baby_png.h"
 uint8_t msg1[AIGIS_SIG_SIG_SIZE],
@@ -8,7 +9,7 @@ uint8_t pub[AIGIS_SIG_PUB_SIZE],
         sec[AIGIS_SIG_SEC_SIZE],
         ctx[AIGIS_SEED_SIZE];
 
-#define ROUND 1
+#define ROUND 500
 int main() {
     // 似乎炸了，但是不清楚哪里炸
     // 明天再调整
@@ -22,20 +23,17 @@ int main() {
             puts("unable to correctly generate sign-keypair!");
             return 1;
         }
-		puts("keypair");
         // 调试用输出msg
         ret = crypto_sign(sig_msg, &sig_msg_len, msg1, AIGIS_SEED_SIZE, ctx, AIGIS_SEED_SIZE, sec);
         if (ret || sig_msg_len != AIGIS_SIG_SIG_SIZE + AIGIS_SEED_SIZE) {
             puts("unable to correctly sign message!");
             return 1;
         }
-		puts("sign");
         ret = crypto_sign_open(msg2, &msg_len, sig_msg, sig_msg_len, ctx, AIGIS_SEED_SIZE, pub);
         if (ret || msg_len != AIGIS_SEED_SIZE) {
             puts("unable to verify signature!");
             return 1;
         }
-		puts("open");
         if (msg_len != AIGIS_SEED_SIZE) {
             puts("incorrect msg_len!");
             return 1;

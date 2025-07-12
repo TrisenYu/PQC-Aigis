@@ -1,3 +1,4 @@
+/// Last modified at 2025年07月12日 星期六 13时28分49秒
 
 #include "sm3.h"
 
@@ -22,21 +23,20 @@ void sm3_extented(
     const uint8_t *in, 
     size_t inlen
 ) {
-
     uint32_t nonce = 0;
     uint8_t *in_ext = (uint8_t*)malloc(inlen + 4);
-    uint8_t *res = (uint8_t*)malloc(SM3_DIGEST_SIZE+outlen),
-            *res_backup = res;
-    int64_t running_outlen = (int64_t)outlen;
+    uint8_t *res = (uint8_t*)malloc(SM3_DIGEST_SIZE);
+	size_t running_outlen = outlen + SM3_DIGEST_SIZE;
     memcpy(in_ext+4, in, inlen);
-    while (running_outlen > 0) {
+    while (running_outlen > SM3_DIGEST_SIZE) {
         add_nonce(in_ext, nonce);
-        sm3(in_ext, inlen + 4, res_backup);
-        res_backup += SM3_DIGEST_SIZE;
+        sm3(in_ext, inlen + 4, res);
         running_outlen -= SM3_DIGEST_SIZE;
+		size_t choice = running_outlen > SM3_DIGEST_SIZE ? 
+						SM3_DIGEST_SIZE : running_outlen;
+		memcpy(out+nonce*SM3_DIGEST_SIZE, res, choice);
         nonce++;
     }
-    memcpy(out, res, outlen);
     free(in_ext);
     free(res);
 }

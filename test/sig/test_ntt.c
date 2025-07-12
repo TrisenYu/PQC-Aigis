@@ -1,7 +1,8 @@
+/// Last modified at 2025年07月12日 星期六 14时35分48秒
 #include "../../aigis_const.h"
 #include "../../reduce.h"
 #include "../../ntt.h"
-#include "../../poly.h"
+#include "../../aigis_poly.h"
 #include <stdio.h>
 
 int16_t a[AIGIS_N] = {

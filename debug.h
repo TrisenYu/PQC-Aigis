@@ -1,29 +1,27 @@
+/// Last modified at 2025年07月12日 星期六 14时45分03秒
 
 #include <stdint.h>
-#include "poly.h"
+#include <stdio.h>
 
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
-void dump_enc_poly(const enc_poly a) {
+void dump_enc_poly(const int16_t a[AIGIS_N]) {
     for (int i = 0; i < AIGIS_N; i ++) {
         printf("%04x", a[i]);
-        // if (!((i + 1) & 7)) {
-        //     puts("");
-        // }
     }
     puts("");
 }
 
-void dump_enc_veck(const enc_veck a) {
+void dump_enc_veck(const int16_t a[AIGIS_ENC_K][AIGIS_N]) {
     for (int i = 0; i < AIGIS_ENC_K; i ++) {
 		printf("%d:|\n", i);
         dump_enc_poly(a[i]);
 		puts("");
     }
-	puts("_-_-_-_-_-_-");
+	puts("");
 }
 
-void dump_sig_poly(const sig_poly a) {
+void dump_sig_poly(const uint32_t a[AIGIS_N]) {
     for (int i = 0; i < AIGIS_N; i ++) {
         printf("%x,", a[i]);
         if (!((i + 1) & 15)) {
@@ -33,22 +31,22 @@ void dump_sig_poly(const sig_poly a) {
     puts("");
 }
 
-void dump_sig_vecl(const sig_vecl a) {
+void dump_sig_vecl(const uint32_t a[AIGIS_SIG_L][AIGIS_N]) {
     for (int i = 0; i < AIGIS_SIG_L; i ++) {
 		printf("%d:|\n", i);
         dump_sig_poly(a[i]);
 		puts("");
     }
-	puts("_-_-_-_-_-_-");
+	puts("");
 }
 
-void dump_sig_veck(const sig_veck a) {
+void dump_sig_veck(const uint32_t a[AIGIS_SIG_K][AIGIS_N]) {
     for (int i = 0; i < AIGIS_SIG_K; i ++) {
 		printf("%d:|\n", i);
         dump_sig_poly(a[i]);
 		puts("");
     }
-	puts("_-_-_-_-_-_-");
+	puts("");
 }
 
 void dump_u8arr(const uint8_t *a, uint64_t lena) {

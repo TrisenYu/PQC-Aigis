@@ -1,6 +1,7 @@
+/// Last modified at 2025年07月12日 星期六 14时39分13秒
 #include <stdint.h>
 #include <stdio.h>
-#include "../../kdf_aux.h"
+#include "../../hash/kdf_aux.h"
 uint16_t _8cast16(uint8_t x) { return (uint16_t)(x); }
 uint16_t aigis_read_qbits(
 	const uint8_t *buf, 

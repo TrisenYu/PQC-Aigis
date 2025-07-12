@@ -1,5 +1,6 @@
+/// Last modified at 2025年07月12日 星期六 14时33分26秒
 /// 密钥交换和签名算法所使用到的打包函数集合
-#include "poly.h"
+#include "aigis_poly.h"
 #include "aigis_comp.h"
 #ifndef __AIGIS_PACK_H__
 #define __AIGIS_PACK_H__
