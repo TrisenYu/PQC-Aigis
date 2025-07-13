@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月12日 星期六 14时32分46秒
+/// Last modified at 2025年07月13日 星期日 12时51分18秒
 
 #include "aigis_const.h"
 #include "aigis_poly.h"
@@ -6,7 +6,7 @@
 // #ifdef __DEBUG
 // #include "debug.h"
 // #include <stdio.h>
-// #endif 
+// #endif
 
 #ifndef __COMP_H__
 #define __COMP_H__
@@ -14,13 +14,12 @@
 
 /// 解压缩算法
 static void comp_poly_3(
-	uint8_t *res, 
-	const enc_poly a 
+	uint8_t *res,
+	const enc_poly a
 ) {
-	uint32_t i = 0, j, k = 0, t[8];
+	uint32_t i = 0, k = 0, t[8];
 	for (; i < AIGIS_N; i += 8, k += 3) {
-		for (j = 0; j < 8; j ++) {
-			// q/2？
+		for (int j = 0; j < 8; j ++) {
 			t[j] = ((((uint32_t)a[i+j] << 3) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 7;
 		}
 		res[k] = t[0] | (t[1] << 3) | (t[2] << 6);
@@ -30,8 +29,8 @@ static void comp_poly_3(
 }
 
 static void comp_poly_4(
-	uint8_t *res, 
-	const enc_poly a 
+	uint8_t *res,
+	const enc_poly a
 ) {
 	uint32_t i = 0, t[2];
 	for (; i < AIGIS_N >> 1; i ++) {
@@ -42,12 +41,12 @@ static void comp_poly_4(
 }
 
 static void comp_poly_5(
-	uint8_t *res, 
-	const enc_poly a 
+	uint8_t *res,
+	const enc_poly a
 ) {
-	uint32_t i = 0, j, k = 0, t[8];
+	uint32_t i = 0, k = 0, t[8];
 	for (; i < AIGIS_N; i += 8, k += 5) {
-		for (j = 0; j < 8; j++) {
+		for (int j = 0; j < 8; j++) {
 			t[j] = ((((uint32_t)a[i + j] << 5) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 0x1f;
 		}
 		res[k] = t[0] | (t[1] << 5);
@@ -62,10 +61,10 @@ static void comp_poly_7(
 	uint8_t *res,
 	const enc_poly a
 ) {
-	uint32_t i = 0, j, k = 0, t[8];
+	uint32_t i = 0, k = 0, t[8];
 	for (; i < AIGIS_N; i ++, k += 7) {
-		for (j = 0; j < 8; j ++) {
-			t[j] = ((((uint32_t)a[i+j] << 7) + (AIGIS_ENC_MOD_Q>>1))/AIGIS_ENC_MOD_Q) & 0x7F;	
+		for (int j = 0; j < 8; j ++) {
+			t[j] = ((((uint32_t)a[i+j] << 7) + (AIGIS_ENC_MOD_Q>>1))/AIGIS_ENC_MOD_Q) & 0x7F;
 		}
 		res[k] = t[0] | (t[1] << 7);
 		res[k + 1] = (t[1] >> 1) | (t[2] << 6);
@@ -78,7 +77,7 @@ static void comp_poly_7(
 }
 
 static void decomp_poly_3(
-	enc_poly res, 
+	enc_poly res,
 	const uint8_t *a
 ) {
 	uint32_t i = 0;
@@ -95,7 +94,7 @@ static void decomp_poly_3(
 }
 
 static void decomp_poly_4(
-	enc_poly res, 
+	enc_poly res,
 	const uint8_t *a
 ) {
 	for (uint32_t i = 0; i < AIGIS_N / 2; i++) {
@@ -105,7 +104,7 @@ static void decomp_poly_4(
 }
 
 static void decomp_poly_5(
-	enc_poly res, 
+	enc_poly res,
 	const uint8_t *a
 ) {
 	uint32_t i = 0;
@@ -122,7 +121,7 @@ static void decomp_poly_5(
 }
 
 static void decomp_poly_7(
-	enc_poly res, 
+	enc_poly res,
 	const uint8_t *a
 ) {
 	uint32_t i = 0;
@@ -141,15 +140,15 @@ static void decomp_poly_7(
 
 
 static void comp_veck_9(
-	uint8_t *res, 
-	const enc_veck a 
+	uint8_t *res,
+	const enc_veck a
 ) {
-    int i = 0, j, k;
+    int i = 0;
 	uint16_t t[8], cpbytes = ((AIGIS_N * 9) >> 3);
     // the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
-		for (j = 0; j < AIGIS_N / 8; j++) {
-			for (k = 0; k<8; k++) {
+		for (int j = 0; j < AIGIS_N / 8; j++) {
+			for (int k = 0; k<8; k++) {
 				t[k] = ((((uint32_t)(a[i][8 * j + k]) << 9) + (AIGIS_ENC_MOD_Q >> 1)) / AIGIS_ENC_MOD_Q) & 0x1ff;
             }
 			res[9 * j + 0] = t[0] & 0xff;
@@ -167,15 +166,15 @@ static void comp_veck_9(
 }
 
 static void comp_veck_10(
-	uint8_t *res, 
-	const enc_veck a 
+	uint8_t *res,
+	const enc_veck a
 ) {
-    int i = 0, j, k;
+    int i = 0;
 	uint16_t t[4];
 	uint16_t cpbytes = ((AIGIS_N * 10) >> 3);//the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
-		for (j = 0; j < AIGIS_N / 4; j++) {
-			for (k = 0; k < 4; k++) {
+		for (int j = 0; j < AIGIS_N / 4; j++) {
+			for (int k = 0; k < 4; k++) {
 				t[k] = ((((uint32_t)(a[i][4 * j + k]) << 10) + (AIGIS_ENC_MOD_Q >> 1)) / AIGIS_ENC_MOD_Q) & 0x3ff;
 			}
 			res[5 * j + 0] = t[0] & 0xff;
@@ -189,20 +188,20 @@ static void comp_veck_10(
 }
 
 static void comp_veck_11(
-	uint8_t *res, 
+	uint8_t *res,
 	const enc_veck a
 ) {
-    int i = 0, j, k;
+    int i = 0;
 	uint16_t t[8],
              cpbytes = ((AIGIS_N * 11) >> 3);
     // the bytes for storing a polynomial in compressed form
 
 	for (; i < AIGIS_ENC_K; i++) {
-		for (j = 0; j < AIGIS_N / 8; j++) {
-			for (k = 0; k < 8; k++) {
+		for (int j = 0; j < AIGIS_N / 8; j++) {
+			for (int k = 0; k < 8; k++) {
 				t[k] = ((((uint32_t)a[i][8 * j + k] << 11) + (AIGIS_ENC_MOD_Q >> 1)) / AIGIS_ENC_MOD_Q) & 0x7ff;
             }
-			res[11 * j + 0] = t[0] & 0xff;                       
+			res[11 * j + 0] = t[0] & 0xff;
 			res[11 * j + 1] = (t[0] >> 8) | ((t[1] & 0x1f) << 3);
 			res[11 * j + 2] = (t[1] >> 5) | ((t[2] & 0x03) << 6);
 			res[11 * j + 3] = (t[2] >> 2) & 0xff;
@@ -219,14 +218,14 @@ static void comp_veck_11(
 }
 
 static void decomp_veck_9(
-	enc_veck res, 
+	enc_veck res,
 	const uint8_t *a
 ) {
-	int i = 0, j;
+	int i = 0;
 	uint16_t cpbytes = ((AIGIS_N * 9) >> 3);
     // the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
-		for (j = 0; j < AIGIS_N / 8; j++) {
+		for (int j = 0; j < AIGIS_N / 8; j++) {
 			res[i][8*j+0] = (((a[9 * j + 0] | (((uint32_t)a[9 * j + 1] & 0x01) << 8)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
 			res[i][8*j+1] = ((((a[9 * j + 1] >> 1) | (((uint32_t)a[9 * j + 2] & 0x03) << 7)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
 			res[i][8*j+2] = ((((a[9 * j + 2] >> 2) | (((uint32_t)a[9 * j + 3] & 0x07) << 6)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
@@ -241,31 +240,30 @@ static void decomp_veck_9(
 }
 
 static void decomp_veck_10(
-	enc_veck res, 
+	enc_veck res,
 	const uint8_t *a
 ) {
-	int i = 0, j;
+	int i = 0;
 	uint16_t cpbytes = ((AIGIS_N * 10) >> 3);
     // the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
-		for (j = 0; j < AIGIS_N / 4; j++) {
+		for (int j = 0; j < AIGIS_N / 4; j++) {
 			res[i][4*j+0] = (((a[5 * j + 0] | (((uint32_t)a[5 * j + 1] & 0x03) << 8)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
 			res[i][4*j+1] = ((((a[5 * j + 1] >> 2) | (((uint32_t)a[5 * j + 2] & 0x0f) << 6)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
 			res[i][4*j+2] = ((((a[5 * j + 2] >> 4) | (((uint32_t)a[5 * j + 3] & 0x3f) << 4)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
 			res[i][4*j+3] = ((((a[5 * j + 3] >> 6) | (((uint32_t)a[5 * j + 4]) << 2)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
 		}
-		// 666 const +=
-		// 虽然 const 是内容不可改动
 		a += cpbytes;
 	}
 }
 
 static void decomp_veck_11(
-	enc_veck res, 
+	enc_veck res,
 	const uint8_t *a
 ) {
 	int i = 0, j;
-	uint16_t cpbytes = ((AIGIS_N * 11) >> 3);//the bytes for storing a polynomial in compressed form
+	uint16_t cpbytes = ((AIGIS_N * 11) >> 3);
+	// the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
 		for (j = 0; j < AIGIS_N / 8; j++) {
 			res[i][8*j+0] = (((a[11*j+0] | (((uint32_t)a[11 * j + 1] & 0x07) << 8)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
@@ -321,9 +319,9 @@ void enc_bytes2poly(enc_poly res, const uint8_t *a) {
 
 /// 在下面选择相应的配置
 void (*enc_pub_compresser) (
-    uint8_t *res, 
-    const enc_veck a 
-) = 
+    uint8_t *res,
+    const enc_veck a
+) =
 #if AIGIS_ENC_BITS_PUB == 9
     comp_veck_9;
 #elif AIGIS_ENC_BITS_PUB == 10
@@ -337,9 +335,9 @@ void (*enc_pub_compresser) (
 
 
 void (*enc_pub_decompresser) (
-    enc_veck res, 
+    enc_veck res,
     const uint8_t *a
-) = 
+) =
 #if AIGIS_ENC_BITS_PUB == 9
     decomp_veck_9;
 #elif AIGIS_ENC_BITS_PUB == 10
@@ -352,9 +350,9 @@ void (*enc_pub_decompresser) (
 #endif  // check AIGIS_ENC_BITS_PUB for pub_decompresser
 
 void (*enc_cft_veck_compresser) (
-	uint8_t *res, 
+	uint8_t *res,
     const enc_veck a
-) = 
+) =
 #if AIGIS_ENC_BITS_CFT == 9
 	comp_veck_9;
 #elif AIGIS_ENC_BITS_CFT == 10
@@ -367,9 +365,9 @@ void (*enc_cft_veck_compresser) (
 #endif // check AIGIS_ENC_BITS_CFT for aigis_cipher_compresser
 
 void (*enc_cft_veck_decompresser) (
-	enc_veck a, 
+	enc_veck a,
     const uint8_t *res
-) = 
+) =
 #if AIGIS_ENC_BITS_CFT == 9
 	decomp_veck_9;
 #elif AIGIS_ENC_BITS_CFT == 10
@@ -383,9 +381,9 @@ void (*enc_cft_veck_decompresser) (
 
 
 void (*enc_cft_poly_compresser) (
-    uint8_t *res, 
+    uint8_t *res,
     const enc_poly a
-) = 
+) =
 #if AIGIS_ENC_BITS_CFT2 == 3
 	comp_poly_3;
 #elif AIGIS_ENC_BITS_CFT2 == 4
@@ -399,9 +397,9 @@ void (*enc_cft_poly_compresser) (
 #endif // configuration for poly_compresser().
 
 void (*enc_cft_poly_decompresser) (
-    enc_poly res, 
+    enc_poly res,
     const uint8_t *a
-) = 
+) =
 #if AIGIS_ENC_BITS_CFT2 == 3
 	decomp_poly_3;
 #elif AIGIS_ENC_BITS_CFT2 == 4
@@ -416,16 +414,6 @@ void (*enc_cft_poly_decompresser) (
 
 /// 和签名解压缩有关的算法
 
-/// sig多项式编译期检查
-/// TODO: 写得太神秘了
-#if AIGIS_SIG_QBITS - AIGIS_SIG_D != 8
-	#error "polyt1_pack() assumes AIGIS_SIG_QBITS - AIGIS_SIG_D == 8"
-#endif // 对AIGIS_SIG_QBITS的检查
-#if AIGIS_SIG_D != 13 && AIGIS_SIG_D != 14
-	#error "polyt0_unpack() assumes AIGIS_SIG_D== 13 or 14"
-#endif // 对AIGIS_SIG_D的检查
-#if AIGIS_SIG_MOD_Q > 8*AIGIS_SIG_ALPHA
-#endif // pack_poly_w1
 
 
 /// 签名算法打包函数
@@ -535,7 +523,7 @@ static uint8_t sig_comp_poly7_4(
 		res[7*i+5]  =  t[2] >> 12;
 		res[7*i+5] |=  t[3] << 2;
 		res[7*i+6]  =  t[3] >> 6;
-	}  
+	}
 	return 0;
 }
 
@@ -561,9 +549,9 @@ static uint8_t sig_decomp_poly4_1(
 	const uint8_t *a
 ) {
 	for (int i = 0; i < AIGIS_N >> 2; i ++) {
-		res[4*i+0] =  a[i] & 0b11;	
-		res[4*i+1] = (a[i]>>2) & 0b11;	
-		res[4*i+2] = (a[i]>>4) & 0b11;	
+		res[4*i+0] =  a[i] & 0b11;
+		res[4*i+1] = (a[i]>>2) & 0b11;
+		res[4*i+2] = (a[i]>>4) & 0b11;
 		res[4*i+3] = (a[i]>>6) & 0b11;
 
 		res[4*i+0] = AIGIS_SIG_MOD_Q + eta_val - res[4*i+0];
@@ -632,7 +620,7 @@ static uint8_t sig_decomp_poly8_13(
 		res[8*i+7] |= (uint32_t)a[13*i+12]<< 5;
 
 		/// 12 = AIGIS_SIG_D - 1
-		/// 1 << 12 = 4096 
+		/// 1 << 12 = 4096
 		for (int j = 0; j < 8; j ++) {
 			res[8*i+j] = AIGIS_SIG_MOD_Q + 4096 - res[8*i+j];
 		}
@@ -651,7 +639,7 @@ static uint8_t sig_decomp_poly4_7(
 		res[4*i+1]  = a[7*i+1] >> 6;
 		res[4*i+1] |= (uint32_t)a[7*i+2] << 2;
 		res[4*i+1] |= (uint32_t)(a[7*i+3] & 0x0F) << 10;
-		
+
 		res[4*i+2]  = a[7*i+3] >> 4;
 		res[4*i+2] |= (uint32_t)a[7*i+4] << 4;
 		res[4*i+2] |= (uint32_t)(a[7*i+5] & 0x03) << 12;
@@ -738,7 +726,7 @@ void sig_poly_z_decompresser(
 
 uint8_t sig_poly_eta_s_compresser(
 	uint8_t *res,
-	const sig_poly a 
+	const sig_poly a
 ) {
 	switch(AIGIS_SIG_ETA_S) {
 	case 1:
@@ -785,7 +773,7 @@ uint8_t sig_poly_eta_e_decompresser(
 #define PACK_ERR UNPACK_ERR
 uint8_t sig_poly_t0_compresser(
 	uint8_t *res,
-	const sig_poly a 
+	const sig_poly a
 ) {
 	switch(AIGIS_SIG_D) {
 	case 13:
@@ -808,7 +796,7 @@ uint8_t sig_poly_t0_decompresser(
 	case 14:
 		return sig_decomp_poly4_7(res, a);
 	default:
-		return UNPACK_ERR;	
+		return UNPACK_ERR;
 	}
 }
 #undef UNPACK_ERR
@@ -817,10 +805,10 @@ uint8_t sig_poly_t0_decompresser(
 /// 大小不匹配啊
 void sig_poly_t1_compresser(
 	uint8_t *res,
-	const sig_poly a 
+	const sig_poly a
 ) {
 	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = a[i];	
+		res[i] = a[i];
 	}
 }
 /// 大小不匹配啊
@@ -829,7 +817,7 @@ void sig_poly_t1_decompresser(
 	const uint8_t *a
 ) {
 	for (int i = 0; i < AIGIS_N; i ++) {
-		res[i] = a[i];	
+		res[i] = a[i];
 	}
 }
 

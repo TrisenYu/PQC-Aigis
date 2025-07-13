@@ -82,7 +82,7 @@ void enc_xof_and_parse(
 	uint8_t buf[AIGIS_ENC_REJ_SIZE+KDF128_RATE];
 	uint32_t len = (AIGIS_ENC_REJ_SIZE+KDF128_RATE-1);
 
-	aigis_kdf_state state;
+	kdf_state state;
 	kdf_init(&state, seed_size);
 	kdf128_absorb(&state, seed, seed_size);
 	kdf_squeeze(&state, buf, len);
@@ -189,7 +189,7 @@ static void _sig_mat_qbits_21_mode(
 static void _sig_mat_qbits_22_mode(
 	uint32_t res_poly[AIGIS_N],
 	uint8_t *out_buf,
-	aigis_kdf_state *state
+	kdf_state *state
 ) {
 	uint32_t pos = 0, ctr = 0, val;
 
@@ -230,7 +230,7 @@ void sig_rej_mat(
 	uint8_t out_buf[AIGIS_SIG_EXP_MATR_SIZE],
 	const uint8_t *inp_buf
 ) {
-	aigis_kdf_state state;
+	kdf_state state;
 	kdf_init(&state, AIGIS_SEED_SIZE+1+(!AIGIS_KDF_CONF));
 	kdf128_absorb(&state, inp_buf, AIGIS_SEED_SIZE+1+(!AIGIS_KDF_CONF));
 	kdf128_sig_squeeze_blocks(&state, out_buf, AIGIS_KDF128_PAD_SIZE/AIGIS_SIG_KDF128_RATE);

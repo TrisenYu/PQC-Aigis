@@ -1,3 +1,4 @@
+/// Last modified at 2025年07月12日 星期六 23时31分22秒
 /// Author: <kisfg@hotmail.com, 2025-06>
 #include <stdint.h>
 
@@ -27,6 +28,8 @@
 
 #define         AIGIS_KDF128_PAD_SIZE       (AIGIS_SIG_KDF128_RATE*6)
 
+#define     AIGIS_SIG_GAMMA1            131072
+
 #if (AIGIS_PARAM_CONF == 1)
     #define     AIGIS_ENC_K                 2
     #define     AIGIS_ENC_ETA_S             4
@@ -44,8 +47,7 @@
     #define     AIGIS_SIG_POW_2_64_Q        1679445ULL  // 2^64 mod AIGIS_SIG_N
     #define     AIGIS_SIG_NEG_QINV          2849953791U // (-q)^(-1) mod 2^32
     #define     AIGIS_SIG_GENERATOR         79          // 用于生成用于ntt的 ζ
-    #define     AIGIS_SIG_GAMMA1            131072
-    #define     AIGIS_SIG_GAMMA2            168448
+    #define     AIGIS_SIG_GAMMA2            168448ULL
     #define     AIGIS_SIG_ALPHA             (AIGIS_SIG_GAMMA2 << 1)
     #define     AIGIS_SIG_DECOMP_BITS       20
     #define     AIGIS_SIG_D                 13
@@ -81,8 +83,7 @@
     #define     AIGIS_SIG_POW_2_64_Q        444720ULL   // 2^64 mod AIGIS_SIG_N
     #define     AIGIS_SIG_NEG_QINV          2671448063U // (-q)^(-1) mod 2^32
     #define     AIGIS_SIG_GENERATOR         19602
-    #define     AIGIS_SIG_GAMMA1            131072
-    #define     AIGIS_SIG_GAMMA2            322560
+    #define     AIGIS_SIG_GAMMA2            322560ULL
     #define     AIGIS_SIG_ALPHA             (AIGIS_SIG_GAMMA2 << 1)
     #define     AIGIS_SIG_DECOMP_BITS       21
     #define     AIGIS_SIG_D                 14
@@ -121,8 +122,7 @@
     #define     AIGIS_SIG_POW_2_64_Q        444720ULL   // 2^64 mod AIGIS_SIG_N
     #define     AIGIS_SIG_NEG_QINV          2671448063U // (-q)^(-1) mod 2^32
     #define     AIGIS_SIG_GENERATOR         19602
-    #define     AIGIS_SIG_GAMMA1            131072
-    #define     AIGIS_SIG_GAMMA2            322560
+    #define     AIGIS_SIG_GAMMA2            322560ULL
     #define     AIGIS_SIG_ALPHA             (AIGIS_SIG_GAMMA2 << 1)
     #define     AIGIS_SIG_DECOMP_BITS       21
     #define     AIGIS_SIG_D                 14
@@ -145,7 +145,7 @@
     #define     AIGIS_SIG_BETA1             60
     #define     AIGIS_SIG_BETA2             275
     #define     AIGIS_SIG_OMEGA             120
-#else 
+#else
     #error "Invalid configuration upon AIGIS_PARAM_CONF"
 #endif // check for AIGIS_PARAM_CONF
 
@@ -204,5 +204,55 @@
     (AIGIS_SIG_OMEGA + AIGIS_SIG_K) +                  \
     (AIGIS_N>>3) + 8                                   \
 )
+
+/// 编译期检查
+/*
+	poly.c:80:#error "rej_eta1() assumes ETA1 <= 3"
+	poly.c:188:#error "rej_eta2() assumes 3 <= ETA2 <=7"
+	poly.c:326:#error "poly_uniform_gamma1m1() assumes GAMMA1 == 131072"
+	poly.c:390:#error "polyeta1_pack() assumes ETA1 <= 3"
+	poly.c:429:#error "polyeta2_pack() assumes ETA2 <= 7"
+	poly.c:546:#error "polyt1_pack() assumes QBITS - PARAM_D == 8"
+	poly.c:568:#error "polyt0_unpack() assumes PARAM_D== 13 or 14"
+	poly.c:702:#error "polyz_pack() assumes GAMMA1-BETA1 <= 2^{17}"
+	poly.c:772:#error "polyw1_pack() assumes PARAM_Q/ALPHA -1 <= 7"
+	hashkdf.h:89:// #error "kem.c/owcpa.c/alg.c only supports SEED_BYTES in {32,64}"
+	rounding.c:21:#error "decompose() assumes (PARAM_Q-1) == 6*ALPHA"
+*/
+#if AIGIS_SEED_SIZE != 32 && AIGIS_SEED_SIZE != 64
+	#error "kdf only support AIGIS_SEED_SIZE in {32, 64}!"
+#endif
+
+#if AIGIS_SIG_ETA_S > 3
+	#error "sig_rej_eta_s() requires AIGIS_SIG_ETA_S <= 3!"
+#endif
+
+#if AIGIS_SIG_ETA_E > 7 || AIGIS_SIG_ETA_E < 3
+	#error "sig_rej_eta_e() requires 3 <= AIGIS_SIG_ETA_E <= 7!"
+#endif
+#if AIGIS_SIG_QBITS - AIGIS_SIG_D != 8
+	#error "sig_poly_t1_pack() requires AIGIS_SIG_QBITS - AIGIS_SIG_D == 8!"
+#endif // sig_poly_t1_pack() 的要求
+
+#if AIGIS_SIG_D != 13 && AIGIS_SIG_D != 14
+	#error "sig_poly_t0_unpack() requires AIGIS_SIG_D == 13 or 14!"
+#endif // sig_poly_t0_unpack() 的要求
+
+#if AIGIS_SIG_MOD_Q > 8*AIGIS_SIG_ALPHA
+	#error "sig_poly_w1_pack() requires AIGIS_SIG_MOD_Q <= AIGIS_SIG_ALPHA<<3!"
+#endif // sig_poly_w1_pack() 的要求
+
+
+#if AIGIS_SIG_GAMMA1 != 131072
+	#error "sig_poly_uniform_gamma1 requires AIGIS_SIG_GAMMA1 == 131072!"
+#endif // sig_poly_uniform_gamma1 的要求
+
+#if AIGIS_SIG_GAMMA1 - AIGIS_SIG_BETA1 > (1 << 17)
+	#error "sig_poly_z_{un}pack() assumes GAMMA1-BETA1 <= 2^{17}!"
+#endif
+
+#if AIGIS_SIG_MOD_Q-1 != 6*AIGIS_SIG_ALPHA
+	#error "decompose() requires (AIGIS_SIG_Q - 1) == 6 * AIGIS_SIG_ALPHA!"
+#endif
 
 #endif // AIGIS_CONST_H

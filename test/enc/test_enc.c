@@ -1,3 +1,4 @@
+/// Last modified at 2025年07月13日 星期日 12时46分55秒
 #include "../../aigis_enc.h"
 #include "../../debug.h"
 #include "../../entropy/baby_png.h"
@@ -37,20 +38,15 @@ int main() {
             dump_u8arr(msg, AIGIS_SEED_SIZE);
             puts("recover:");
             dump_u8arr(test_text, AIGIS_SEED_SIZE);
-            return 1;    
+            return 1;
         }
         cnt += 1;
-        if (cnt ^ TEST_ROUND) { 
+        if (cnt ^ TEST_ROUND) {
             randombytes(msg, AIGIS_SEED_SIZE);
         } // 改变明文
     }
-    for (int i = 0; i < AIGIS_SEED_SIZE; i ++) {
-        printf("%02x", msg[i]);
-    }
-    puts("");
-    for (int i = 0; i < AIGIS_SEED_SIZE; i ++) {
-        printf("%02x", test_text[i]);
-    }
+	dump_u8arr(msg, AIGIS_SEED_SIZE);
+	dump_u8arr(test_text, AIGIS_SEED_SIZE);
     puts("\nwell done!");
     return 0;
 }

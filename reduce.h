@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月12日 星期六 14时07分08秒
+/// Last modified at 2025年07月12日 星期六 22时55分04秒
 /// Author: <kisfg@hotmail.com, 2025-06>
 #include "aigis_const.h"
 #ifndef __AIGIS_REDUCE_H__
@@ -92,7 +92,7 @@ uint32_t make_hint(const uint32_t a, const uint32_t b) {
 }
 
 uint32_t use_hint(const uint32_t a, const uint32_t hint) {
-	uint32_t a0 = 0, a1 = 0;
+	uint32_t a0, a1;
 	decompose(a, &a0, &a1);
 	if (!hint) {
 		return a1;

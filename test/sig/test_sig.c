@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月12日 星期六 14时07分29秒
+/// Last modified at 2025年07月13日 星期日 12时47分36秒
 #include "../../aigis_sig.h"
 #include "../../entropy/baby_png.h"
 uint8_t msg1[AIGIS_SIG_SIG_SIZE],
@@ -11,8 +11,6 @@ uint8_t pub[AIGIS_SIG_PUB_SIZE],
 
 #define ROUND 500
 int main() {
-    // 似乎炸了，但是不清楚哪里炸
-    // 明天再调整
     size_t sig_msg_len = 0, msg_len = 0;
     randombytes(ctx, AIGIS_SEED_SIZE);
     int i = ROUND;
@@ -39,7 +37,7 @@ int main() {
             return 1;
         }
         for (int j = 0; j < msg_len; j ++) {
-            if (msg1[j] ^ msg2[j]) {    
+            if (msg1[j] ^ msg2[j]) {
                 puts("incorrect msg_content!");
                 return 1;
             }
@@ -54,7 +52,7 @@ int main() {
         ret = crypto_sign_open(msg2, &msg_len, sig_msg, sig_msg_len, ctx, AIGIS_SEED_SIZE, pub);
         if (!ret) {
             puts("impossible condition!");
-            return 1;        
+            return 1;
         }
     }
     return 0 * puts("ok");

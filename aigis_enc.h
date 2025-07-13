@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月12日 星期六 14时38分54秒
+/// Last modified at 2025年07月12日 星期六 22时43分59秒
 #include "aigis_const.h"
 #include "ntt.h"
 #include "hash/kdf_aux.h"
@@ -76,14 +76,14 @@ int aigis_enc_encrypt(
     const uint8_t comp_pub[AIGIS_ENC_PUB_SIZE],
     const uint8_t coins[AIGIS_SEED_SIZE]
 ) {
-    enc_veck *s_vec       = (enc_veck*)malloc(sizeof(enc_veck)),
-             *pub_vec     = (enc_veck*)malloc(sizeof(enc_veck)),
-             *err_vec     = (enc_veck*)malloc(sizeof(enc_veck)),
-             *cipher_vec1 = (enc_veck*)malloc(sizeof(enc_veck));
-    enc_matr *mat_at      = (enc_matr*)malloc(sizeof(enc_matr));
-    enc_poly *cipher_poly2= (enc_poly*)malloc(sizeof(enc_poly)),
-             *msg_poly    = (enc_poly*)malloc(sizeof(enc_poly)),
-             *err_poly    = (enc_poly*)malloc(sizeof(enc_poly));
+    enc_veck *s_vec        = (enc_veck*)malloc(sizeof(enc_veck)),
+             *pub_vec      = (enc_veck*)malloc(sizeof(enc_veck)),
+             *err_vec      = (enc_veck*)malloc(sizeof(enc_veck)),
+             *cipher_vec1  = (enc_veck*)malloc(sizeof(enc_veck));
+    enc_matr *mat_at       = (enc_matr*)malloc(sizeof(enc_matr));
+    enc_poly *cipher_poly2 = (enc_poly*)malloc(sizeof(enc_poly)),
+             *msg_poly     = (enc_poly*)malloc(sizeof(enc_poly)),
+             *err_poly     = (enc_poly*)malloc(sizeof(enc_poly));
     uint8_t seed[AIGIS_SEED_SIZE],
             nonce = 0;
 

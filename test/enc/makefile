@@ -1,5 +1,5 @@
-kdf_conf=1
-alg_conf=3
+kdf_conf=0
+alg_conf=1
 
 AIGIS_CONF=-DAIGIS_PARAM_CONF=$(alg_conf)
 AIGIS_CONF+=-DAIGIS_KDF_CONF=$(kdf_conf)

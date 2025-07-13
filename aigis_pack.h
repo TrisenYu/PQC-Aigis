@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月12日 星期六 14时33分26秒
+/// Last modified at 2025年07月12日 星期六 18时57分42秒
 /// 密钥交换和签名算法所使用到的打包函数集合
 #include "aigis_poly.h"
 #include "aigis_comp.h"
@@ -149,30 +149,18 @@ void sig_unpack_sec(
 	for (; i < AIGIS_SEED_SIZE*2 + AIGIS_CRH_SIZE; i ++) {
 		res_buf[i] = sec[i];
 	}
-#ifdef __DEBUG
-	// printf("%p\n", sec);
-#endif
 	sec += 2*AIGIS_SEED_SIZE + AIGIS_CRH_SIZE;
 	for (i = 0; i < AIGIS_SIG_L; i ++) {
 		sig_poly_eta_s_decompresser(res_s1[i], &sec[i*AIGIS_SIG_POLY_ETA_S_COMP_SIZE]);
 	}
-#ifdef __DEBUG
-	// printf("%p\n", sec);
-#endif
 	sec += AIGIS_PVEC_L_ETA_S_SIZE;
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
 		sig_poly_eta_e_decompresser(res_s2[i], &sec[i*AIGIS_SIG_POLY_ETA_E_COMP_SIZE]);
 	}
-#ifdef __DEBUG
-	// printf("%p\n", sec);
-#endif
 	sec += AIGIS_PVEC_K_ETA_E_SIZE;
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
 		sig_poly_t0_decompresser(res_t0[i], &sec[i*AIGIS_SIG_POLY_T0_COMP_SIZE]);
 	}
-#ifdef __DEBUG
-	// printf("%p\n", sec);
-#endif
 }
 
 /*************************************************

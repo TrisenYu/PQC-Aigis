@@ -170,7 +170,7 @@ void poly_uniform_seed(
 	uint8_t buf[480+KDF128_RATE];
 	uint32_t len = (480+KDF128_RATE-1);
 
-	aigis_kdf_state state;
+	kdf_state state;
 	kdf_init(&state, seed_size);
 	kdf128_absorb(&state, seed, seed_size);
     kdf_squeeze(&state, buf, len);
@@ -200,7 +200,7 @@ void aigis_xof_and_parse(
 	uint8_t buf[480+KDF128_RATE];
 	uint32_t len = 480+KDF128_RATE-1;
 
-    aigis_kdf_state state;
+    kdf_state state;
 	kdf_init(&state, seed_size);
 	kdf128_absorb(&state, seed, seed_size);
     kdf_squeeze(&state, buf, len);

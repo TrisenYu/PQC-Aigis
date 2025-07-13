@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月12日 星期六 14时33分10秒
+/// Last modified at 2025年07月12日 星期六 22时53分55秒
 /// 用于存放签名算法
 #include "aigis_poly.h"
 #include "samplers/rej_samp.h"
@@ -42,7 +42,7 @@ void sig_challenge(
 	}
 
 	// kdf_state 得根据实际情况变动
-	aigis_kdf_state state;
+	kdf_state state;
 	kdf_init(&state, AIGIS_CRH_SIZE+AIGIS_PVEC_K_W1_SIZE+1);
 	kdf256_absorb(&state, inp_buf, AIGIS_CRH_SIZE+AIGIS_PVEC_K_W1_SIZE+1);
 	kdf256_sig_squeeze_blocks(&state, out_buf, 1);
@@ -79,12 +79,12 @@ int sig_inner_keypair(
 ) {
 	uint16_t nonce = 0;
 	uint8_t buf[AIGIS_SEED_SIZE*3+AIGIS_CRH_SIZE];
-	sig_vecl *s1 = (sig_vecl*)malloc(sizeof(sig_vecl)),
-			 *s1_hat = (sig_vecl*)malloc(sizeof(sig_vecl));
-	sig_veck *s2 = (sig_veck*)malloc(sizeof(sig_veck)),
-			 *t1 = (sig_veck*)malloc(sizeof(sig_veck)),
-			 *t0 = (sig_veck*)malloc(sizeof(sig_veck));
-	sig_matr_kl *mat = (sig_matr_kl*)malloc(sizeof(sig_matr_kl));
+	sig_vecl *s1		= (sig_vecl*)malloc(sizeof(sig_vecl)),
+			 *s1_hat	= (sig_vecl*)malloc(sizeof(sig_vecl));
+	sig_veck *s2		= (sig_veck*)malloc(sizeof(sig_veck)),
+			 *t1 		= (sig_veck*)malloc(sizeof(sig_veck)),
+			 *t0 		= (sig_veck*)malloc(sizeof(sig_veck));
+	sig_matr_kl *mat	= (sig_matr_kl*)malloc(sizeof(sig_matr_kl));
 
 
 	kdf_xof256(buf, 3*AIGIS_SEED_SIZE, coins, AIGIS_SEED_SIZE);
@@ -177,22 +177,22 @@ int crypto_sign_signature_internal(
 	uint32_t n;
 	uint8_t *buf;
 	uint16_t nonce = 0;
-	sig_poly	*c	 = (sig_poly*)calloc(1, sizeof(sig_poly)),
-				*chat  = (sig_poly*)calloc(1, sizeof(sig_poly));
-	sig_matr_kl *mat   = (sig_matr_kl*)calloc(1, sizeof(sig_matr_kl));
-	sig_vecl	*s1	= (sig_vecl*)calloc(1, sizeof(sig_vecl)),
-				*y	 = (sig_vecl*)calloc(1, sizeof(sig_vecl)),
-				*yhat  = (sig_vecl*)calloc(1, sizeof(sig_vecl)),
-				*z	 = (sig_vecl*)calloc(1, sizeof(sig_vecl));
-	sig_veck	*s2	= (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*t0	= (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*w	 = (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*w1	= (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*h	 = (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*wcs2  = (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*wcs20 = (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*ct0   = (sig_veck*)calloc(1, sizeof(sig_veck)),
-				*tmp   = (sig_veck*)calloc(1, sizeof(sig_veck));
+	sig_poly	*c		= (sig_poly*)calloc(1, sizeof(sig_poly)),
+				*chat	= (sig_poly*)calloc(1, sizeof(sig_poly));
+	sig_matr_kl *mat  	= (sig_matr_kl*)calloc(1, sizeof(sig_matr_kl));
+	sig_vecl	*s1		= (sig_vecl*)calloc(1, sizeof(sig_vecl)),
+				*y		= (sig_vecl*)calloc(1, sizeof(sig_vecl)),
+				*yhat	= (sig_vecl*)calloc(1, sizeof(sig_vecl)),
+				*z		= (sig_vecl*)calloc(1, sizeof(sig_vecl));
+	sig_veck	*s2		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*t0		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*w		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*w1		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*h		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*wcs2	= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*wcs20	= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*ct0	= (sig_veck*)calloc(1, sizeof(sig_veck)),
+				*tmp	= (sig_veck*)calloc(1, sizeof(sig_veck));
 
   	buf = (uint8_t*)calloc(2*AIGIS_SEED_SIZE + AIGIS_CRH_SIZE + msg_len, 1);
 	sig_unpack_sec(buf, *s1, *s2, *t0, sec);
@@ -213,7 +213,7 @@ int crypto_sign_signature_internal(
 	sig_veck_ntt(*s2);
 	sig_veck_ntt(*t0);
 
-back:
+st_resamp:
 	for(i = 0; i < AIGIS_SIG_L; ++i) {
 		sig_poly_gamma1_m1_uniform(
 			(*y)[i], &buf[AIGIS_SEED_SIZE],
@@ -246,7 +246,7 @@ back:
 		);
 	}
 	if (res) {
-		goto back;
+		goto st_resamp;
 	}
 
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
@@ -262,7 +262,7 @@ back:
 		}
 	}
 	if (res) {
-		goto back;
+		goto st_resamp;
 	}
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
 		sig_poly_dot_mul((*ct0)[i], *chat, (*t0)[i]);
@@ -271,7 +271,7 @@ back:
 		res |= sig_poly_check_norm((*ct0)[i], AIGIS_SIG_GAMMA2);
 	}
 	if (res) {
-		goto back;
+		goto st_resamp;
 	}
 	for (i = 0; i < AIGIS_SIG_K; i ++) {
 		sig_poly_add((*tmp)[i], (*wcs2)[i], (*ct0)[i]);
@@ -280,7 +280,7 @@ back:
 	}
 	n = sig_veck_make_hint(*h, *tmp, *ct0);
 	if (n > AIGIS_SIG_OMEGA) {
-		goto back;
+		goto st_resamp;
 	}
 	sig_pack_sig(sig, *z, *h, *c);
 	*sig_len = AIGIS_SIG_SIG_SIZE;
