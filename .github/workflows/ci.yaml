@@ -4,10 +4,14 @@ on: [push]
 jobs:
   tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        kdf_conf: [0, 1]
+        param_conf: [1, 2, 3]
     steps:
       - name: compile-and-test
-        working-directory: ../
+        uses: actions/checkout@main
         run: |
           mkdir -p build && cd build
-          cmake ..
+          cmake -DAIGIS_PARAM_CONF=${{ matrix.param_conf }} -DAIGIS_KDF_CONF=${{ matrix.kdf_conf }} ..
           make && make run

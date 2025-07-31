@@ -1,5 +1,5 @@
-/// Last modified at 2025年07月13日 星期日 14时18分51秒
-/// Author: <kisfg@hotmail.com, 2025-06>
+/// Last modified at 2025年07月31日 星期四 19时21分42秒
+/// Author: <kisfg@hotmail.com, 2025-{6, 7}>
 #include <stdint.h>
 
 #ifndef __AIGIS_CONST_H__
