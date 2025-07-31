@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 16时32分06秒
+/// Last modified at 2025年07月31日 星期四 17时47分45秒
 #include "sm3/sm3.h"
 #include "sm3/kdf.h"
 #include "keccak/fips202.h"
@@ -248,6 +248,7 @@ extern _hash_x					hash_h;
 extern _hash_x 					hash_g;
 extern _kdf_xof					kdf_xof128;
 extern _kdf_xof					kdf_xof256;
+
 #if (AIGIS_KDF_CONF == 0)
     #define KDF128_RATE 32
     #define KDF256_RATE 32

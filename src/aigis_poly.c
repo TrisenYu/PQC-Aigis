@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 16时04分20秒
+/// Last modified at 2025年07月31日 星期四 17时46分02秒
 #include "aigis_poly.h"
 #include "samplers/rej_samp.c"
 
@@ -285,8 +285,8 @@ void enc_veck_add_poly(
 
 void enc_veck_mul(
 	enc_veck res,
-	enc_veck ntt_a,
-	enc_veck ntt_b
+	const enc_veck ntt_a,
+	const enc_veck ntt_b
 ) {
 	for (int i = 0; i < AIGIS_ENC_K; i ++) {
 		enc_poly_dot_mul(res[i], ntt_a[i], ntt_b[i]);

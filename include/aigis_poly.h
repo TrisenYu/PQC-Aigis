@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 14时38分47秒
+/// Last modified at 2025年07月31日 星期四 17时45分48秒
 
 #include "ntt.h"
 #include "reduce.h"
@@ -129,8 +129,8 @@ void enc_veck_add_poly(
 );
 void enc_veck_mul(
 	enc_veck res,
-	enc_veck ntt_a,
-	enc_veck ntt_b
+	const enc_veck ntt_a,
+	const enc_veck ntt_b
 );
 void enc_inner_mul(
 	enc_poly res,

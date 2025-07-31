@@ -1,10 +1,10 @@
-/// Last modified at 2025年07月31日 星期四 14时11分36秒
+/// Last modified at 2025年07月31日 星期四 17时41分32秒
 #include "aigis_poly.h"
 #include "aigis_enc.h"
 #include "debug.h"
 
-uint8_t seed[AIGIS_N], buf[2048];
-uint8_t buf1[2048], msg[AIGIS_SEED_SIZE] = "helloworld?!?!?!";
+uint8_t seed[AIGIS_N], buf[4096];
+uint8_t buf1[4096], msg[AIGIS_SEED_SIZE] = "helloworld?!?!?!";
 uint8_t tsed[AIGIS_SEED_SIZE];
 enc_matr mat, mata;
 enc_veck a, b, c, sv, ev, tpub, tsec;

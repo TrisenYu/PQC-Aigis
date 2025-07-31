@@ -2,14 +2,14 @@
 #
 # (C) All rights reserved. Author: <kisfg@hotmail.com> in 2025
 # Created at 2025年07月31日 星期四 15时26分35秒
-# Last modified at 2025年07月31日 星期四 17时08分50秒
+# Last modified at 2025年07月31日 星期四 17时40分37秒
 cmake_minimum_required(VERSION 4.0.0)
 project(aigis C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
 add_definitions(
-	-DAIGIS_PARAM_CONF=1
+	-DAIGIS_PARAM_CONF=3
 	-DAIGIS_KDF_CONF=1
 )
 include_directories(include .)
