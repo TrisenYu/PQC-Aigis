@@ -9,14 +9,18 @@ jobs:
         cc: ["clang", "gcc"]
         kdf_conf: [0, 1]
         param_conf: [1, 2, 3]
-      max-parallel: 2
+      max-parallel: 4
 
     steps:
       - name: 切分支
         uses: actions/checkout@main
-
+        env:
+          ccompiler: ${{ matrix.cc }}
       - name: 下依赖
-        run: sudo apt install clang gcc
+        run: |
+          if [ "$ccompiler" == "clang" ]; then
+            sudo apt install clang
+          fi
 
       - name: compile-and-test
         env:
@@ -29,5 +33,5 @@ jobs:
           -DAIGIS_PARAM_CONF=$aigis_param \
           -DAIGIS_KDF_CONF=$kdf \
           -DCMAKE_C_COMPILER=$ccompiler ..
-          make && make run
+          make run
           echo 'done...'
