@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 14时12分21秒
+/// Last modified at 2025年08月01日 星期五 00时12分08秒
 #include "aigis_sig.h"
 #include "entropy/baby_png.h"
 uint8_t msg1[AIGIS_SIG_SIG_SIZE],

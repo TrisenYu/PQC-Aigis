@@ -1,7 +1,12 @@
-/// Last modified at 2025年07月31日 星期四 16时01分36秒
+/// Last modified at 2025年08月01日 星期五 00时11分29秒
 #include "aigis_comp.h"
 #include "aigis_sig.h"
 #include "aigis_pack.h"
+
+// #define __DEBUG
+#ifdef __DEBUG
+#include "debug.h"
+#endif //DEBUG
 
 void sig_challenge(
 	sig_poly ch,
@@ -58,17 +63,23 @@ int sig_inner_keypair(
 	uint8_t *coins
 ) {
 	uint16_t nonce = 0;
-	uint8_t buf[AIGIS_SEED_SIZE*3+AIGIS_CRH_SIZE];
-	sig_vecl *s1		= (sig_vecl*)malloc(sizeof(sig_vecl)),
-			 *s1_hat	= (sig_vecl*)malloc(sizeof(sig_vecl));
-	sig_veck *s2		= (sig_veck*)malloc(sizeof(sig_veck)),
-			 *t1 		= (sig_veck*)malloc(sizeof(sig_veck)),
-			 *t0 		= (sig_veck*)malloc(sizeof(sig_veck));
-	sig_matr_kl *mat	= (sig_matr_kl*)malloc(sizeof(sig_matr_kl));
+	uint8_t buf[AIGIS_SEED_SIZE*3+AIGIS_CRH_SIZE]={0};
+	sig_vecl *s1		= (sig_vecl*)calloc(1, sizeof(sig_vecl)),
+			 *s1_hat	= (sig_vecl*)calloc(1, sizeof(sig_vecl));
+	sig_veck *s2		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+			 *t1 		= (sig_veck*)calloc(1, sizeof(sig_veck)),
+			 *t0 		= (sig_veck*)calloc(1, sizeof(sig_veck));
+	sig_matr_kl *mat	= (sig_matr_kl*)calloc(1, sizeof(sig_matr_kl));
 
 	/// TODO: XOF256
 	kdf_xof256(buf, 3*AIGIS_SEED_SIZE, coins, AIGIS_SEED_SIZE);
 	sig_expand_mat(*mat, &buf[AIGIS_SEED_SIZE]);
+#ifdef __DEBUG
+	// puts("xof256-buf");
+	// dump_u8arr(buf, AIGIS_SEED_SIZE*3+AIGIS_CRH_SIZE);
+	// puts("mat");
+	// dump_sig_poly((*mat)[1][1]);
+#endif //DEBUG
 
 	for (int i = 0; i < AIGIS_SIG_L; i ++) {
 		sig_poly_eta_s_uniform((*s1)[i], buf, nonce++);
@@ -124,7 +135,7 @@ int sig_keypair(
 	uint8_t *res_sec
 ) {
 	uint8_t coins[AIGIS_SEED_SIZE] = {0};
-  	// randombytes(coins, AIGIS_SEED_SIZE);
+  	randombytes(coins, AIGIS_SEED_SIZE);
 	return sig_inner_keypair(res_pub, res_sec, coins);
 }
 

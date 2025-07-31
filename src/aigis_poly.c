@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 17时46分02秒
+/// Last modified at 2025年08月01日 星期五 00时08分42秒
 #include "aigis_poly.h"
 #include "samplers/rej_samp.c"
 
@@ -28,7 +28,7 @@ void sig_expand_mat(
 	const uint8_t rho[AIGIS_SEED_SIZE]
 ) {
 	uint32_t i = 0, j = 0;
-	uint8_t inp_buf[AIGIS_SEED_SIZE+2],
+	uint8_t inp_buf[AIGIS_SEED_SIZE+2]={0},
 			*out_buf = (uint8_t*)calloc(AIGIS_SIG_EXP_MATR_SIZE, 1);
 
 	memcpy(inp_buf, rho, AIGIS_SEED_SIZE);
