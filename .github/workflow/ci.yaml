@@ -1,0 +1,12 @@
+name: encapsulation and signature test-ci/cd.
+on: [push]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: compile-and-test
+        run: |
+          mkdir -p build && cd build
+          cmake ..
+          make && make run
