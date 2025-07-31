@@ -1,7 +1,7 @@
-/// Last modified at 2025年07月13日 星期日 12时46分55秒
-#include "../../aigis_enc.h"
-#include "../../debug.h"
-#include "../../entropy/baby_png.h"
+/// Last modified at 2025年07月31日 星期四 14时11分30秒
+#include "aigis_enc.h"
+#include "debug.h"
+#include "entropy/baby_png.h"
 uint8_t msg[AIGIS_SEED_SIZE] = "helloworld?!?!?!?!";
 
 uint8_t pubkey[AIGIS_ENC_PUB_SIZE],

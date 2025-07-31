@@ -2,3 +2,8 @@
 tags
 *.exe
 *.out
+platform/*
+testcode/*
+.github/*
+design.txt
+build/*

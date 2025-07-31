@@ -1,3 +1,4 @@
+/// Last modified at 2025年07月31日 星期四 14时11分11秒
 /// SPDX-LICENSE-IDENTIFIER: GPL2.0
 ///
 /// (C) All rights reversed.
@@ -5,8 +6,8 @@
 /// FileName: test_key.c
 /// Created at 2025年07月09日 星期三 12时21分43秒
 #define __DEBUG
-#include "../../aigis_sig.h"
-#include "../../debug.h"
+#include "aigis_sig.h"
+#include "debug.h"
 
 uint8_t pub[AIGIS_SIG_PUB_SIZE],
 		sec[AIGIS_SIG_SEC_SIZE],
@@ -19,10 +20,10 @@ int main() {
 	// dump_u8arr(pub, AIGIS_SIG_PUB_SIZE);
 	// puts("sec");
 	// dump_u8arr(sec, AIGIS_SIG_SEC_SIZE);
-	// unsigned char *sig, 
-	// size_t *sig_len, 
-	// const unsigned char *msg, 
-	// size_t msg_len, 
+	// unsigned char *sig,
+	// size_t *sig_len,
+	// const unsigned char *msg,
+	// size_t msg_len,
 	// const unsigned char *sec
 	/*
 	 *	1852 20

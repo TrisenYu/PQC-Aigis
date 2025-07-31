@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 14时12分08秒
+/// Last modified at 2025年07月31日 星期四 14时11分43秒
 #include "aigis_const.h"
 #include "reduce.h"
 #include "ntt.h"
@@ -29,7 +29,7 @@ int16_t a[AIGIS_N] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0,10,20, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -66,7 +66,7 @@ uint32_t xa[AIGIS_N] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -86,25 +86,27 @@ void dump_b() {
     }
 }
 
+int16_t test_poly[AIGIS_N];
+uint8_t msg[AIGIS_SEED_SIZE] = "helloworld?!?!?!?";
+
 int main() {
-    // printf("0x%08x\n", (1uLL << 32)-1);
-    // enc_ntt(a);
-    // enc_ntt(b);
-    // enc_poly_dot_mul(a, a, b);
-    // enc_inv_ntt(a);
-    // enc_inv_ntt(b);
-    // for (int i = 0; i < AIGIS_N; i ++) {
-    //     printf("%3d, ", a[i]);
-    //     if ((i + 1) % 16 == 0) { puts(""); }
-    // }
-    // dump_b();
+    printf("0x%08llx\n", (1uLL << 32)-1);
+    enc_ntt(a);
+    enc_ntt(b);
+    enc_poly_dot_mul(a, a, b);
+    enc_inv_ntt(a);
+    enc_inv_ntt(b);
+    for (int i = 0; i < AIGIS_N; i ++) {
+        printf("%3d, ", a[i]);
+        if ((i + 1) % 16 == 0) { puts(""); }
+    }
+    dump_b();
 
     sig_ntt(xa);
     sig_ntt(xb);
     sig_poly_dot_mul(xa, xa, xb);
     sig_inv_ntt(xa);
     sig_inv_ntt(xb);
-    // TODO: Halston, We met an issue...
     for (int i = 0; i < AIGIS_N; i ++) {
         printf("%4d, ", xa[i] % AIGIS_SIG_MOD_Q);
         if ((i + 1) % 16 == 0) { puts(""); }
@@ -115,4 +117,11 @@ int main() {
             puts("");
         }
     }
+	puts("");
+	// enc_poly_from_msg(test_poly, msg);
+	// for (int i = 0; i < AIGIS_N; i++) {
+	// 	printf("%04x", test_poly[i]);
+	// 	if (!((i+1)&7)) { puts(""); }
+	// }
+	return 0;
 }

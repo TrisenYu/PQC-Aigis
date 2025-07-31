@@ -1,6 +1,6 @@
-/// Last modified at 2025年07月13日 星期日 12时47分36秒
-#include "../../aigis_sig.h"
-#include "../../entropy/baby_png.h"
+/// Last modified at 2025年07月31日 星期四 14时12分21秒
+#include "aigis_sig.h"
+#include "entropy/baby_png.h"
 uint8_t msg1[AIGIS_SIG_SIG_SIZE],
         msg2[AIGIS_SIG_SIG_SIZE + AIGIS_SEED_SIZE],
         sig_msg[AIGIS_SIG_SIG_SIZE + AIGIS_SEED_SIZE];

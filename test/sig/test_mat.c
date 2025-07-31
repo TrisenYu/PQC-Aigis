@@ -1,7 +1,8 @@
+/// Last modified at 2025年07月31日 星期四 14时12分01秒
 #define __DEBUG
 
-#include "../../aigis_sig.h"
-#include "../../debug.h"
+#include "aigis_sig.h"
+#include "debug.h"
 sig_matr_kl mat;
 sig_vecl s1;
 sig_veck s2;
