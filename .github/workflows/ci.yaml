@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: compile-and-test
+        working-directory: ./
         run: |
           mkdir -p build && cd build
           cmake ..
