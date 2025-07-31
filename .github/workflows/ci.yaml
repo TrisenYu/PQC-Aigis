@@ -2,16 +2,24 @@ name: encapsulation and signature test-ci/cd.
 on: [push]
 
 jobs:
-  tests:
+  normal-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         kdf_conf: [0, 1]
         param_conf: [1, 2, 3]
+      max-parallel: 2
+
     steps:
-      - name: compile-and-test
+      - name: 切分支
         uses: actions/checkout@main
+
+      - name: compile-and-test
+        env:
+          param: ${{ matrix.param_conf }}
+          kdf: ${{ matrix.kdf_conf }}
         run: |
           mkdir -p build && cd build
-          cmake -DAIGIS_PARAM_CONF=${{ matrix.param_conf }} -DAIGIS_KDF_CONF=${{ matrix.kdf_conf }} ..
+          cmake -DAIGIS_PARAM_CONF=$param -DAIGIS_KDF_CONF=$kdf ..
           make && make run
+          echo 'done...'
