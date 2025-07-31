@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        cc: ["clang", "gcc"]
         kdf_conf: [0, 1]
         param_conf: [1, 2, 3]
       max-parallel: 2
@@ -14,12 +15,19 @@ jobs:
       - name: 切分支
         uses: actions/checkout@main
 
+      - name: 下依赖
+        run: sudo apt install clang gcc
+
       - name: compile-and-test
         env:
-          param: ${{ matrix.param_conf }}
+          aigis_param: ${{ matrix.param_conf }}
           kdf: ${{ matrix.kdf_conf }}
+          ccompiler: ${{ matrix.cc }}
         run: |
           mkdir -p build && cd build
-          cmake -DAIGIS_PARAM_CONF=$param -DAIGIS_KDF_CONF=$kdf ..
+          cmake \
+          -DAIGIS_PARAM_CONF=$aigis_param \
+          -DAIGIS_KDF_CONF=$kdf \
+          -DCMAKE_C_COMPILER=$ccompiler ..
           make && make run
           echo 'done...'

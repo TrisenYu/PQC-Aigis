@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 14时11分11秒
+/// Last modified at 2025年07月31日 星期四 22时11分47秒
 /// SPDX-LICENSE-IDENTIFIER: GPL2.0
 ///
 /// (C) All rights reversed.
@@ -12,14 +12,16 @@
 uint8_t pub[AIGIS_SIG_PUB_SIZE],
 		sec[AIGIS_SIG_SEC_SIZE],
 		sed[AIGIS_SEED_SIZE];
-uint8_t msg[1024] = "helloworld!?!?!?!?!?",
-		sig[4096];
+uint8_t msg[AIGIS_SEED_SIZE] = "helloworld!?!?!?!?!?\0",
+		sig[AIGIS_SIG_SIG_SIZE];
 size_t sig_len;
 int main() {
+	printf("sig-size: %d\n", AIGIS_SIG_SIG_SIZE);
 	sig_inner_keypair(pub, sec, sed);
-	// dump_u8arr(pub, AIGIS_SIG_PUB_SIZE);
-	// puts("sec");
-	// dump_u8arr(sec, AIGIS_SIG_SEC_SIZE);
+	puts("pub");
+	dump_u8arr(pub, AIGIS_SIG_PUB_SIZE);
+	puts("sec");
+	dump_u8arr(sec, AIGIS_SIG_SEC_SIZE);
 	// unsigned char *sig,
 	// size_t *sig_len,
 	// const unsigned char *msg,
@@ -33,8 +35,9 @@ int main() {
 		eb,cc,9e,19,42,9e,25,4a,8e,8a,44,06,f7,c7,cf,2d
 	 * */
 	crypto_sign_signature_internal(sig, &sig_len, msg, 20, sec);
-	// dump_u8arr(sig, AIGIS_SIG_SIG_SIZE);
-	// printf("%zu\n", sig_len);
+	puts("sig");
+	dump_u8arr(sig, AIGIS_SIG_SIG_SIZE);
+	printf("sig-len: %zu\n", sig_len);
 
 	size_t msg_len = 20;
 	// const unsigned char *sig, size_t sig_len,

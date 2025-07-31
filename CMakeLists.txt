@@ -2,29 +2,27 @@
 #
 # (C) All rights reserved. Author: <kisfg@hotmail.com> in 2025
 # Created at 2025年07月31日 星期四 15时26分35秒
-# Last modified at 2025年07月31日 星期四 19时43分51秒
+# Last modified at 2025年07月31日 星期四 22时05分51秒
 cmake_minimum_required(VERSION 3.13.0)
 project(aigis C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# add_compile_definitions(
-# 	AIGIS_PARAM_CONF
-# 	AIGIS_KDF_CONF
-# )
+
+message(STATUS "c compiler: ${CMAKE_C_COMPILER}")
 if (DEFINED AIGIS_PARAM_CONF)
 	message(STATUS "param_conf: ${AIGIS_PARAM_CONF}")
 	add_compile_definitions(-DAIGIS_PARAM_CONF=${AIGIS_PARAM_CONF})
 else()
 	add_compile_definitions(-DAIGIS_PARAM_CONF=1)
 endif()
-
 if (DEFINED AIGIS_KDF_CONF)
 	message(STATUS "kdf_conf: ${AIGIS_KDF_CONF}")
 	add_compile_definitions(-DAIGIS_KDF_CONF=${AIGIS_KDF_CONF})
 else()
 	add_compile_definitions(-DAIGIS_KDF_CONF=1)
 endif()
+
 
 include_directories(include .)
 file(GLOB_RECURSE src_files "src/*.c")
