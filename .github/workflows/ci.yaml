@@ -18,7 +18,7 @@ jobs:
           ccompiler: ${{ matrix.cc }}
       - name: 下依赖
         run: |
-          if [ "$ccompiler" == "clang" ]; then
+          if [[ "$ccompiler" == "clang" ]]; then
             sudo apt install clang
           fi
 

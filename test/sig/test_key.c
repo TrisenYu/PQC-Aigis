@@ -18,7 +18,7 @@ size_t sig_len;
 int main() {
 	printf("sig-size: %d\n", AIGIS_SIG_SIG_SIZE);
 	printf("confs: %d %d\n", AIGIS_PARAM_CONF, AIGIS_KDF_CONF);
-	sig_inner_keypair(pub, sec, sed);
+	aigis_inner_keypair(pub, sec, sed);
 	// puts("pub");
 	// dump_u8arr(pub, AIGIS_SIG_PUB_SIZE);
 	// puts("sec");
@@ -35,7 +35,7 @@ int main() {
 		41,73,02,9d,01,3f,cb,c5,6b,8f,26,4f,df,5d,9c,e2,
 		eb,cc,9e,19,42,9e,25,4a,8e,8a,44,06,f7,c7,cf,2d
 	 * */
-	crypto_sign_signature_internal(sig, &sig_len, msg, 20, sec);
+	aigis_inner_sign(sig, &sig_len, msg, 20, sec);
 	// puts("sig");
 	// dump_u8arr(sig, AIGIS_SIG_SIG_SIZE);
 	// printf("sig-len: %zu\n", sig_len);
@@ -44,7 +44,7 @@ int main() {
 	// const unsigned char *sig, size_t sig_len,
 	// const unsigned char *msg, size_t msg_len,
 	// const unsigned char *pub
-	int ret = crypto_sign_verify_internal(sig, sig_len, msg, msg_len, pub);
+	int ret = aigis_inner_verify(sig, sig_len, msg, msg_len, pub);
 	printf("%d\n", ret);
 	return ret;
 }

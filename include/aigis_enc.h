@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 13时33分23秒
+/// Last modified at 2025年08月01日 星期五 18时29分40秒
 #include "ntt.h"
 #include "aigis_const.h"
 #include "aigis_poly.h"
@@ -29,9 +29,7 @@ static int is_arr_eq(
     const uint8_t *b,
     size_t len
 ) {
-    uint64_t r = 0;
-    size_t i = 0;
-
+    uint64_t r = 0, i = 0;
     for (; i < len; i ++){
         r |= a[i] ^ b[i];
     }
@@ -59,7 +57,6 @@ static void cmov(
     uint8_t b
 ) {
     size_t i = 0;
-
     b = -b;
     for (; i < len; i++) {
         r[i] ^= b & (x[i] ^ r[i]);

@@ -1,12 +1,7 @@
-/// Last modified at 2025年08月01日 星期五 00时11分29秒
+/// Last modified at 2025年08月01日 星期五 18时28分27秒
 #include "aigis_comp.h"
 #include "aigis_sig.h"
 #include "aigis_pack.h"
-
-// #define __DEBUG
-#ifdef __DEBUG
-#include "debug.h"
-#endif //DEBUG
 
 void sig_challenge(
 	sig_poly ch,
@@ -57,7 +52,7 @@ void sig_challenge(
 }
 
 
-int sig_inner_keypair(
+int aigis_inner_keypair(
 	uint8_t *res_pub,
 	uint8_t *res_sec,
 	uint8_t *coins
@@ -74,12 +69,6 @@ int sig_inner_keypair(
 	/// TODO: XOF256
 	kdf_xof256(buf, 3*AIGIS_SEED_SIZE, coins, AIGIS_SEED_SIZE);
 	sig_expand_mat(*mat, &buf[AIGIS_SEED_SIZE]);
-#ifdef __DEBUG
-	// puts("xof256-buf");
-	// dump_u8arr(buf, AIGIS_SEED_SIZE*3+AIGIS_CRH_SIZE);
-	// puts("mat");
-	// dump_sig_poly((*mat)[1][1]);
-#endif //DEBUG
 
 	for (int i = 0; i < AIGIS_SIG_L; i ++) {
 		sig_poly_eta_s_uniform((*s1)[i], buf, nonce++);
@@ -115,7 +104,7 @@ int sig_inner_keypair(
 }
 
 /*************************************************
-* Name:		crypto_sign_keypair_internal
+* Name:	 aigis_sig_keypair
 *
 * Description: Generates public and private key.
 *
@@ -130,19 +119,19 @@ int sig_inner_keypair(
 * where pub = rho|t1
 *	   sec = rho|key|hash(pub)|s1|s2|t0
 **************************************************/
-int sig_keypair(
+int aigis_sig_keypair(
 	uint8_t *res_pub,
 	uint8_t *res_sec
 ) {
 	uint8_t coins[AIGIS_SEED_SIZE] = {0};
   	randombytes(coins, AIGIS_SEED_SIZE);
-	return sig_inner_keypair(res_pub, res_sec, coins);
+	return aigis_inner_keypair(res_pub, res_sec, coins);
 }
 
 /// TODO: 写注释，理解清楚签名函数的步骤
 
 /*************************************************
-* Name:		crypto_sign_signature_internal
+* Name:		aigis_inner_sign
 *
 * Description: Computes signature.
 *
@@ -158,7 +147,7 @@ int sig_keypair(
 * create a signature sig_msg on message m, where
 * sig_msg = z|h|c
 **************************************************/
-int crypto_sign_signature_internal(
+int aigis_inner_sign(
 	uint8_t *sig,
 	size_t *sig_len,
 	const uint8_t *msg,
@@ -299,7 +288,7 @@ st_resamp:
 }
 
 /*************************************************
-* Name:		crypto_sign_signature
+* Name:		aigis_sign_gen
 *
 * Description: Computes signature.
 *
@@ -313,7 +302,7 @@ st_resamp:
 *
 * Returns 0 (success), -1 (context string too long error)
 **************************************************/
-int crypto_sign_signature(
+int aigis_sign_gen(
 	uint8_t *sig,
 	size_t *sig_len,
 	const uint8_t *m,
@@ -337,7 +326,7 @@ int crypto_sign_signature(
 	}
 	memcpy(m_extended + 2 + ctx_len, m, msg_len);
 
-	int ret = crypto_sign_signature_internal(
+	int ret = aigis_inner_sign(
 		sig, sig_len, m_extended,
 		msg_len + ctx_len + 2, sec
 	);
@@ -363,7 +352,7 @@ int crypto_sign_signature(
 *
 * Returns 0 (success), -1 (context string too long error)
 **************************************************/
-int crypto_sign(
+int aigis_create_sign(
 	uint8_t *sig_msg,
 	size_t *smsg_len,
 	const uint8_t *m,
@@ -377,7 +366,7 @@ int crypto_sign(
 	for(i = 0; i < msg_len; ++i) {
 		sig_msg[AIGIS_SIG_SIG_SIZE + msg_len - 1 - i] = m[msg_len - 1 - i];
 	}
-	int ret = crypto_sign_signature(
+	int ret = aigis_sign_gen(
 		sig_msg, smsg_len,
 		sig_msg + AIGIS_SIG_SIG_SIZE,
 		msg_len, ctx, ctx_len, sec
@@ -387,7 +376,7 @@ int crypto_sign(
 }
 
 /*************************************************
-* Name:		crypto_sign_verify_internal
+* Name:		aigis_inner_verify
 *
 * Description: Verifies signature.
 *
@@ -399,7 +388,7 @@ int crypto_sign(
 *
 * Returns 0 if signature could be verified correctly and -1 otherwise
 **************************************************/
-int crypto_sign_verify_internal(
+int aigis_inner_verify(
   const uint8_t *sig, size_t sig_len,
   const uint8_t *msg, size_t msg_len,
   const uint8_t *pub
@@ -488,7 +477,7 @@ end:
 }
 
 /*************************************************
-* Name:		crypto_sign_verify
+* Name:		aigis_sign_verify
 *
 * Description: Verifies signature.
 *
@@ -502,7 +491,7 @@ end:
 *
 * Returns 0 if signature could be verified correctly and -1 otherwise
 **************************************************/
-int crypto_sign_verify(
+int aigis_sign_verify(
 	const uint8_t *sig,
 	size_t sig_len,
 	const uint8_t *m,
@@ -526,7 +515,7 @@ int crypto_sign_verify(
 	memcpy(m_extended + 2 + ctx_len, m, msg_len);
 
 	int ret = 0;
-	ret = crypto_sign_verify_internal(
+	ret = aigis_inner_verify(
 		sig, sig_len, m_extended,
 		msg_len + ctx_len + 2, pub
 	);
@@ -535,7 +524,7 @@ int crypto_sign_verify(
 }
 
 /*************************************************
-* Name:		crypto_sign_open
+* Name:		aigis_reveal_sign
 *
 * Description: Verify signed message.
 *
@@ -550,7 +539,7 @@ int crypto_sign_verify(
 *
 * Returns 0 if signed message could be verified correctly and -1 otherwise
 **************************************************/
-int crypto_sign_open(
+int aigis_reveal_sign(
 	uint8_t *msg,
 	size_t *msg_len,
 	const uint8_t *sig_msg,
@@ -574,7 +563,7 @@ int crypto_sign_open(
 	}
   	*msg_len = smsg_len - AIGIS_SIG_SIG_SIZE;
 	int ret = 0;
-	ret = crypto_sign_verify(
+	ret = aigis_sign_verify(
 		sig_msg, AIGIS_SIG_SIG_SIZE,
 		sig_msg + AIGIS_SIG_SIG_SIZE,
 		*msg_len, ctx, ctx_len, pub

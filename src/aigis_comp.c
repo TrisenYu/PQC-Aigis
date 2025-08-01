@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 15时54分39秒
+/// Last modified at 2025年08月01日 星期五 18时40分20秒
 #include "aigis_comp.h"
 
 /// 解压缩算法
@@ -39,10 +39,10 @@ static void comp_poly_5(
 			t[j] = ((((uint32_t)a[i + j] << 5) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 0x1f;
 		}
 		res[k] = t[0] | (t[1] << 5);
-		res[k + 1] = (t[1] >> 3) | (t[2] << 2) | (t[3] << 7);
-		res[k + 2] = (t[3] >> 1) | (t[4] << 4);
-		res[k + 3] = (t[4] >> 4) | (t[5] << 1) | (t[6] << 6);
-		res[k + 4] = (t[6] >> 2) | (t[7] << 3);
+		res[k+1] = (t[1] >> 3) | (t[2] << 2) | (t[3] << 7);
+		res[k+2] = (t[3] >> 1) | (t[4] << 4);
+		res[k+3] = (t[4] >> 4) | (t[5] << 1) | (t[6] << 6);
+		res[k+4] = (t[6] >> 2) | (t[7] << 3);
 	}
 }
 
@@ -56,12 +56,12 @@ static void comp_poly_7(
 			t[j] = ((((uint32_t)a[i+j] << 7) + (AIGIS_ENC_MOD_Q>>1))/AIGIS_ENC_MOD_Q) & 0x7F;
 		}
 		res[k] = t[0] | (t[1] << 7);
-		res[k + 1] = (t[1] >> 1) | (t[2] << 6);
-		res[k + 2] = (t[2] >> 2) | (t[3] << 5);
-		res[k + 3] = (t[3] >> 3) | (t[4] << 4);
-		res[k + 4] = (t[4] >> 4) | (t[5] << 3);
-		res[k + 5] = (t[5] >> 5) | (t[6] << 2);
-		res[k + 6] = (t[6] >> 6) | (t[7] << 1);
+		res[k+1] = (t[1] >> 1) | (t[2] << 6);
+		res[k+2] = (t[2] >> 2) | (t[3] << 5);
+		res[k+3] = (t[3] >> 3) | (t[4] << 4);
+		res[k+4] = (t[4] >> 4) | (t[5] << 3);
+		res[k+5] = (t[5] >> 5) | (t[6] << 2);
+		res[k+6] = (t[6] >> 6) | (t[7] << 1);
 	}
 }
 
@@ -71,14 +71,14 @@ static void decomp_poly_3(
 ) {
 	uint32_t i = 0;
 	for (; i < AIGIS_N; i += 8, a += 3) {
-		res[i + 0] = (((a[0] & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 1] = ((((a[0] >> 3) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 2] = ((((a[0] >> 6) | ((a[1] << 2) & 4)) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 3] = ((((a[1] >> 1) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 4] = ((((a[1] >> 4) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 5] = ((((a[1] >> 7) | ((a[2] << 1) & 6)) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 6] = ((((a[2] >> 2) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
-		res[i + 7] = ((((a[2] >> 5)) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+0] = (((a[0] & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+1] = ((((a[0] >> 3) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+2] = ((((a[0] >> 6) | ((a[1] << 2) & 4)) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+3] = ((((a[1] >> 1) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+4] = ((((a[1] >> 4) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+5] = ((((a[1] >> 7) | ((a[2] << 1) & 6)) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+6] = ((((a[2] >> 2) & 7) * AIGIS_ENC_MOD_Q) + 4) >> 3;
+		res[i+7] = ((((a[2] >> 5)) * AIGIS_ENC_MOD_Q) + 4) >> 3;
 	}
 }
 
@@ -98,14 +98,14 @@ static void decomp_poly_5(
 ) {
 	uint32_t i = 0;
 	for (; i < AIGIS_N; i += 8, a += 5) {
-		res[i + 0] = (((a[0] & 0x1f) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 1] = ((((a[0] >> 5) | ((a[1] & 3) << 3)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 2] = ((((a[1] >> 2) & 0x1f) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 3] = ((((a[1] >> 7) | ((a[2] & 0xf)<<1)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 4] = ((((a[2] >> 4) | ((a[3] & 0x1)<<4)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 5] = ((((a[3] >> 1) & 0x1f) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 6] = ((((a[3] >> 6) | ((a[4] & 0x7)<<2)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
-		res[i + 7] = ((((a[4] >> 3)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+0] = (((a[0] & 0x1f) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+1] = ((((a[0] >> 5) | ((a[1] & 3) << 3)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+2] = ((((a[1] >> 2) & 0x1f) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+3] = ((((a[1] >> 7) | ((a[2] & 0xf)<<1)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+4] = ((((a[2] >> 4) | ((a[3] & 0x1)<<4)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+5] = ((((a[3] >> 1) & 0x1f) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+6] = ((((a[3] >> 6) | ((a[4] & 0x7)<<2)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
+		res[i+7] = ((((a[4] >> 3)) * AIGIS_ENC_MOD_Q) + 16) >> 5;
 	}
 }
 
@@ -115,14 +115,14 @@ static void decomp_poly_7(
 ) {
 	uint32_t i = 0;
 	for (; i < AIGIS_N; i += 8, a += 7) {
-		res[i + 0] = (((a[0] & 0x7f) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 1] = ((((a[0] >> 7) | ((a[1] & 0x3f) << 1)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 2] = ((((a[1] >> 6) | ((a[2] & 0x1f) << 2)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 3] = ((((a[2] >> 5) | ((a[3] & 0xf) << 3)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 4] = ((((a[3] >> 4) | ((a[4] & 0x7) << 4)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 5] = ((((a[4] >> 3) | ((a[5] & 0x3) << 5)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 6] = ((((a[5] >> 2) | ((a[6] & 0x1) << 6)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
-		res[i + 7] = ((((a[6] >> 1)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+0] = (( (a[0]&0x7f) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+1] = ((((a[0] >> 7) | ((a[1] & 0x3f) << 1)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+2] = ((((a[1] >> 6) | ((a[2] & 0x1f) << 2)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+3] = ((((a[2] >> 5) | ((a[3] & 0xf) << 3)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+4] = ((((a[3] >> 4) | ((a[4] & 0x7) << 4)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+5] = ((((a[4] >> 3) | ((a[5] & 0x3) << 5)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+6] = ((((a[5] >> 2) | ((a[6] & 0x1) << 6)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
+		res[i+7] = ((((a[6] >> 1)) * AIGIS_ENC_MOD_Q) + 64) >> 7;
 	}
 }
 
@@ -139,15 +139,15 @@ static void comp_veck_9(
 			for (int k = 0; k<8; k++) {
 				t[k] = ((((uint32_t)(a[i][8 * j + k]) << 9) + (AIGIS_ENC_MOD_Q >> 1)) / AIGIS_ENC_MOD_Q) & 0x1ff;
             }
-			res[9 * j + 0] = t[0] & 0xff;
-			res[9 * j + 1] = (t[0] >> 8) | ((t[1] & 0x7f) << 1);
-			res[9 * j + 2] = (t[1] >> 7) | ((t[2] & 0x3f) << 2);
-			res[9 * j + 3] = (t[2] >> 6) | ((t[3] & 0x1f) << 3);
-			res[9 * j + 4] = (t[3] >> 5) | ((t[4] & 0x0f) << 4);
-			res[9 * j + 5] = (t[4] >> 4) | ((t[5] & 0x07) << 5);
-			res[9 * j + 6] = (t[5] >> 3) | ((t[6] & 0x03) << 6);
-			res[9 * j + 7] = (t[6] >> 2) | ((t[7] & 0x01) << 7);
-			res[9 * j + 8] = (t[7] >> 1);
+			res[9*j+0] = t[0] & 0xff;
+			res[9*j+1] = (t[0] >> 8) | ((t[1] & 0x7f) << 1);
+			res[9*j+2] = (t[1] >> 7) | ((t[2] & 0x3f) << 2);
+			res[9*j+3] = (t[2] >> 6) | ((t[3] & 0x1f) << 3);
+			res[9*j+4] = (t[3] >> 5) | ((t[4] & 0x0f) << 4);
+			res[9*j+5] = (t[4] >> 4) | ((t[5] & 0x07) << 5);
+			res[9*j+6] = (t[5] >> 3) | ((t[6] & 0x03) << 6);
+			res[9*j+7] = (t[6] >> 2) | ((t[7] & 0x01) << 7);
+			res[9*j+8] = (t[7] >> 1);
 		}
 		res += cpbytes;
 	}
@@ -165,11 +165,11 @@ static void comp_veck_10(
 			for (int k = 0; k < 4; k++) {
 				t[k] = ((((uint32_t)(a[i][4 * j + k]) << 10) + (AIGIS_ENC_MOD_Q >> 1)) / AIGIS_ENC_MOD_Q) & 0x3ff;
 			}
-			res[5 * j + 0] = t[0] & 0xff;
-			res[5 * j + 1] = (t[0] >> 8) | ((t[1] & 0x3f) << 2);
-			res[5 * j + 2] = (t[1] >> 6) | ((t[2] & 0x0f) << 4);
-			res[5 * j + 3] = (t[2] >> 4) | ((t[3] & 0x03) << 6);
-			res[5 * j + 4] = (t[3] >> 2);
+			res[5*j+0] = t[0] & 0xff;
+			res[5*j+1] = (t[0] >> 8) | ((t[1] & 0x3f) << 2);
+			res[5*j+2] = (t[1] >> 6) | ((t[2] & 0x0f) << 4);
+			res[5*j+3] = (t[2] >> 4) | ((t[3] & 0x03) << 6);
+			res[5*j+4] = (t[3] >> 2);
 		}
 		res += cpbytes;
     }
@@ -187,19 +187,19 @@ static void comp_veck_11(
 	for (; i < AIGIS_ENC_K; i++) {
 		for (int j = 0; j < AIGIS_N / 8; j++) {
 			for (int k = 0; k < 8; k++) {
-				t[k] = ((((uint32_t)a[i][8 * j + k] << 11) + (AIGIS_ENC_MOD_Q >> 1)) / AIGIS_ENC_MOD_Q) & 0x7ff;
+				t[k] = ((((uint32_t)a[i][8*j+k]<<11) + (AIGIS_ENC_MOD_Q>>1)) / AIGIS_ENC_MOD_Q) & 0x7ff;
             }
-			res[11 * j + 0] = t[0] & 0xff;
-			res[11 * j + 1] = (t[0] >> 8) | ((t[1] & 0x1f) << 3);
-			res[11 * j + 2] = (t[1] >> 5) | ((t[2] & 0x03) << 6);
-			res[11 * j + 3] = (t[2] >> 2) & 0xff;
-			res[11 * j + 4] = (t[2] >> 10) | ((t[3] & 0x7f) << 1);
-			res[11 * j + 5] = (t[3] >> 7) | ((t[4] & 0x0f) << 4);
-			res[11 * j + 6] = (t[4] >> 4) | ((t[5] & 0x01) << 7);
-			res[11 * j + 7] = (t[5] >> 1) & 0xff;
-			res[11 * j + 8] = (t[5] >> 9) | ((t[6] & 0x3f) << 2);
-			res[11 * j + 9] = (t[6] >> 6) | ((t[7] & 0x07) << 5);
-			res[11 * j + 10] = (t[7] >> 3);
+			res[11*j+0] = t[0] & 0xff;
+			res[11*j+1] = (t[0] >> 8) | ((t[1] & 0x1f) << 3);
+			res[11*j+2] = (t[1] >> 5) | ((t[2] & 0x03) << 6);
+			res[11*j+3] = (t[2] >> 2) & 0xff;
+			res[11*j+4] = (t[2] >> 10) | ((t[3] & 0x7f) << 1);
+			res[11*j+5] = (t[3] >> 7) | ((t[4] & 0x0f) << 4);
+			res[11*j+6] = (t[4] >> 4) | ((t[5] & 0x01) << 7);
+			res[11*j+7] = (t[5] >> 1) & 0xff;
+			res[11*j+8] = (t[5] >> 9) | ((t[6] & 0x3f) << 2);
+			res[11*j+9] = (t[6] >> 6) | ((t[7] & 0x07) << 5);
+			res[11*j+10] = (t[7] >> 3);
 		}
 		res += cpbytes;
 	}
@@ -214,14 +214,14 @@ static void decomp_veck_9(
     // the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
 		for (int j = 0; j < AIGIS_N / 8; j++) {
-			res[i][8*j+0] = (((a[9 * j + 0] | (((uint32_t)a[9 * j + 1] & 0x01) << 8)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+1] = ((((a[9 * j + 1] >> 1) | (((uint32_t)a[9 * j + 2] & 0x03) << 7)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+2] = ((((a[9 * j + 2] >> 2) | (((uint32_t)a[9 * j + 3] & 0x07) << 6)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+3] = ((((a[9 * j + 3] >> 3) | (((uint32_t)a[9 * j + 4] & 0x0f) << 5)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+4] = ((((a[9 * j + 4] >> 4) | (((uint32_t)a[9 * j + 5] & 0x1f) << 4)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+5] = ((((a[9 * j + 5] >> 5) | (((uint32_t)a[9 * j + 6] & 0x3f) << 3)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+6] = ((((a[9 * j + 6] >> 6) | (((uint32_t)a[9 * j + 7] & 0x7f) << 2)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
-			res[i][8*j+7] = ((((a[9 * j + 7] >> 7) | (((uint32_t)a[9 * j + 8]) << 1)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+0] = ((( a[9*j+0] | (((uint32_t)a[9*j+1] & 0x01)  <<8)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+1] = ((((a[9*j+1]>>1) | (((uint32_t)a[9*j+2]&0x03)<<7)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+2] = ((((a[9*j+2]>>2) | (((uint32_t)a[9*j+3]&0x07)<<6)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+3] = ((((a[9*j+3]>>3) | (((uint32_t)a[9*j+4]&0x0f)<<5)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+4] = ((((a[9*j+4]>>4) | (((uint32_t)a[9*j+5]&0x1f)<<4)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+5] = ((((a[9*j+5]>>5) | (((uint32_t)a[9*j+6]&0x3f)<<3)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+6] = ((((a[9*j+6]>>6) | (((uint32_t)a[9*j+7]&0x7f)<<2)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
+			res[i][8*j+7] = ((((a[9*j+7]>>7) | (((uint32_t)a[9*j+8]     )<<1)) * AIGIS_ENC_MOD_Q) + 256) >> 9;
 		}
 		a += cpbytes;
 	}
@@ -236,10 +236,10 @@ static void decomp_veck_10(
     // the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
 		for (int j = 0; j < AIGIS_N / 4; j++) {
-			res[i][4*j+0] = (((a[5 * j + 0] | (((uint32_t)a[5 * j + 1] & 0x03) << 8)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
-			res[i][4*j+1] = ((((a[5 * j + 1] >> 2) | (((uint32_t)a[5 * j + 2] & 0x0f) << 6)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
-			res[i][4*j+2] = ((((a[5 * j + 2] >> 4) | (((uint32_t)a[5 * j + 3] & 0x3f) << 4)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
-			res[i][4*j+3] = ((((a[5 * j + 3] >> 6) | (((uint32_t)a[5 * j + 4]) << 2)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
+			res[i][4*j+0] = (((a[5*j+0] | (((uint32_t)a[5*j+1] & 0x03) << 8)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
+			res[i][4*j+1] = ((((a[5*j+1] >> 2) | (((uint32_t)a[5*j+2] & 0x0f) << 6)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
+			res[i][4*j+2] = ((((a[5*j+2] >> 4) | (((uint32_t)a[5*j+3] & 0x3f) << 4)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
+			res[i][4*j+3] = ((((a[5*j+3] >> 6) | (((uint32_t)a[5*j+4]) << 2)) * AIGIS_ENC_MOD_Q) + 512) >> 10;
 		}
 		a += cpbytes;
 	}
@@ -254,14 +254,14 @@ static void decomp_veck_11(
 	// the bytes for storing a polynomial in compressed form
 	for (; i < AIGIS_ENC_K; i++) {
 		for (j = 0; j < AIGIS_N / 8; j++) {
-			res[i][8*j+0] = (((a[11*j+0] | (((uint32_t)a[11 * j + 1] & 0x07) << 8)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+1] = ((((a[11*j+1] >> 3) | (((uint32_t)a[11 * j + 2] & 0x3f) << 5)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+2] = ((((a[11*j+2] >> 6) | (((uint32_t)a[11 * j + 3] & 0xff) << 2) | (((uint32_t)a[11 * j + 4] & 0x01) << 10)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+3] = ((((a[11*j+4] >> 1) | (((uint32_t)a[11 * j + 5] & 0x0f) << 7)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+4] = ((((a[11*j+5] >> 4) | (((uint32_t)a[11 * j + 6] & 0x7f) << 4)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+5] = ((((a[11*j+6] >> 7) | (((uint32_t)a[11 * j + 7] & 0xff) << 1) | (((uint32_t)a[11 * j + 8] & 0x03) << 9)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+6] = ((((a[11*j+8] >> 2) | (((uint32_t)a[11 * j + 9] & 0x1f) << 6)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
-			res[i][8*j+7] = ((((a[11*j+9] >> 5) | (((uint32_t)a[11 * j + 10] & 0xff) << 3)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
+			res[i][8*j+0] = (((a[11*j+0] | (((uint32_t)a[11*j+1]&0x07)<<8))*AIGIS_ENC_MOD_Q)+1024) >> 11;
+			res[i][8*j+1] = ((((a[11*j+1]>>3) | (((uint32_t)a[11*j+2] &0x3f)<<5))*AIGIS_ENC_MOD_Q)+1024) >> 11;
+			res[i][8*j+2] = ((((a[11*j+2]>>6) | (((uint32_t)a[11*j+3] &0xff)<<2) | (((uint32_t)a[11*j+4]&0x01)<<10))*AIGIS_ENC_MOD_Q)+1024)>>11;
+			res[i][8*j+3] = ((((a[11*j+4]>>1) | (((uint32_t)a[11*j+5] &0x0f)<<7))*AIGIS_ENC_MOD_Q)+1024)>>11;
+			res[i][8*j+4] = ((((a[11*j+5]>>4) | (((uint32_t)a[11*j+6] &0x7f)<<4))*AIGIS_ENC_MOD_Q)+1024)>>11;
+			res[i][8*j+5] = ((((a[11*j+6]>>7) | (((uint32_t)a[11*j+7] &0xff)<<1) | (((uint32_t)a[11*j+8]&0x03)<< 9)) * AIGIS_ENC_MOD_Q) + 1024) >> 11;
+			res[i][8*j+6] = ((((a[11*j+8]>>2) | (((uint32_t)a[11*j+9] &0x1f)<<6))*AIGIS_ENC_MOD_Q)+1024)>>11;
+			res[i][8*j+7] = ((((a[11*j+9]>>5) | (((uint32_t)a[11*j+10]&0xff)<<3))*AIGIS_ENC_MOD_Q)+1024)>>11;
 		}
 		a += cpbytes;
 	}
@@ -292,13 +292,13 @@ void enc_poly2bytes(uint8_t *res, const enc_poly a) {
 
 void enc_bytes2poly(enc_poly res, const uint8_t *a) {
 	for(uint64_t i = 0; i < AIGIS_N >> 3; i ++) {
-		res[(i << 3) + 0] =  a[13*i+ 0]       | (((uint16_t)a[13*i+ 1] & 0x1f) << 8);
-		res[(i << 3) + 1] = (a[13*i+ 1] >> 5) | (((uint16_t)a[13*i+ 2]       ) << 3) | (((uint16_t)a[13*i+ 3] & 0x03) << 11);
-		res[(i << 3) + 2] = (a[13*i+ 3] >> 2) | (((uint16_t)a[13*i+ 4] & 0x7f) << 6);
-		res[(i << 3) + 3] = (a[13*i+ 4] >> 7) | (((uint16_t)a[13*i+ 5]       ) << 1) | (((uint16_t)a[13*i+ 6] & 0x0f) <<  9);
-		res[(i << 3) + 4] = (a[13*i+ 6] >> 4) | (((uint16_t)a[13*i+ 7]       ) << 4) | (((uint16_t)a[13*i+ 8] & 0x01) << 12);
-		res[(i << 3) + 5] = (a[13*i+ 8] >> 1) | (((uint16_t)a[13*i+ 9] & 0x3f) << 7);
-		res[(i << 3) + 6] = (a[13*i+ 9] >> 6) | (((uint16_t)a[13*i+10]       ) << 2) | (((uint16_t)a[13*i+11] & 0x07) << 10);
+		res[(i << 3) + 0] =  a[13*i+0]        | (((uint16_t)a[13*i+1]  & 0x1f) << 8);
+		res[(i << 3) + 1] = (a[13*i+1]  >> 5) | (((uint16_t)a[13*i+2]        ) << 3) | (((uint16_t)a[13*i+ 3] & 0x03) << 11);
+		res[(i << 3) + 2] = (a[13*i+3]  >> 2) | (((uint16_t)a[13*i+4]  & 0x7f) << 6);
+		res[(i << 3) + 3] = (a[13*i+4]  >> 7) | (((uint16_t)a[13*i+5]        ) << 1) | (((uint16_t)a[13*i+ 6] & 0x0f) <<  9);
+		res[(i << 3) + 4] = (a[13*i+6]  >> 4) | (((uint16_t)a[13*i+7]        ) << 4) | (((uint16_t)a[13*i+ 8] & 0x01) << 12);
+		res[(i << 3) + 5] = (a[13*i+8]  >> 1) | (((uint16_t)a[13*i+9]  & 0x3f) << 7);
+		res[(i << 3) + 6] = (a[13*i+9]  >> 6) | (((uint16_t)a[13*i+10]       ) << 2) | (((uint16_t)a[13*i+11] & 0x07) << 10);
 		res[(i << 3) + 7] = (a[13*i+11] >> 3) | (((uint16_t)a[13*i+12]       ) << 5);
 	}
 }

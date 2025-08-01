@@ -14,23 +14,23 @@ void sig_challenge(
 	const uint8_t mu[AIGIS_CRH_SIZE],
 	const sig_veck w1
 );
-int sig_inner_keypair(
+int aigis_inner_keypair(
 	uint8_t *res_pub,
 	uint8_t *res_sec,
 	uint8_t *coins
 );
-int sig_keypair(
+int aigis_sig_keypair(
 	uint8_t *res_pub,
 	uint8_t *res_sec
 );
-int crypto_sign_signature_internal(
+int aigis_inner_sign(
 	uint8_t *sig,
 	size_t *sig_len,
 	const uint8_t *msg,
 	size_t msg_len,
 	const uint8_t *sec
 );
-int crypto_sign_signature(
+int aigis_sign_gen(
 	uint8_t *sig,
 	size_t *sig_len,
 	const uint8_t *m,
@@ -39,7 +39,7 @@ int crypto_sign_signature(
 	size_t ctx_len,
 	const uint8_t *sec
 );
-int crypto_sign(
+int aigis_create_sign(
 	uint8_t *sig_msg,
 	size_t *smsg_len,
 	const uint8_t *m,
@@ -48,12 +48,12 @@ int crypto_sign(
 	size_t ctx_len,
 	const uint8_t *sec
 );
-int crypto_sign_verify_internal(
+int aigis_inner_verify(
   const uint8_t *sig, size_t sig_len,
   const uint8_t *msg, size_t msg_len,
   const uint8_t *pub
 );
-int crypto_sign_verify(
+int aigis_sign_verify(
 	const uint8_t *sig,
 	size_t sig_len,
 	const uint8_t *m,
@@ -62,7 +62,7 @@ int crypto_sign_verify(
 	size_t ctx_len,
 	const uint8_t *pub
 );
-int crypto_sign_open(
+int aigis_reveal_sign(
 	uint8_t *msg,
 	size_t *msg_len,
 	const uint8_t *sig_msg,

@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 14时40分43秒
+/// Last modified at 2025年08月01日 星期五 18时30分42秒
 #include "aigis_enc.h"
 
 #define NEED_TRANSPOSE 1
@@ -79,12 +79,6 @@ int aigis_enc_encrypt(
     enc_veck_ntt(*pub_vec);
 
     // 将消息编码到多项式上
-    // TODO:
-    //      还是有点奇怪，
-    //      这个函数要求的msg长度为 AIGIS_SEED_SIZE.
-    //      照理来说应该能对任意字节都能做才是
-    // 感觉可能要改成循环？然后剩余的补零
-    // 因为最后是对 cipher_vec1 和 cipher_poly2 封装为密文，所以每次都需要重新生成err_vec和s_vec
     enc_poly_from_msg(*msg_poly, msg);
     // 矩阵 A^T
     enc_gen_matr(*mat_at, seed, NEED_TRANSPOSE);
@@ -118,7 +112,6 @@ int aigis_enc_encrypt(
     enc_poly_shrink_q(*cipher_poly2, enc_n2q_q);
     enc_veck_shrink_q(*cipher_vec1, enc_nq_q);
 
-    // TODO: 比如分段做
     enc_pack_ciphertext(res_cipher, *cipher_vec1, *cipher_poly2);
 end:
     free(s_vec);

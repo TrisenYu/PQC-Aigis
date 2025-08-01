@@ -16,18 +16,18 @@ int main() {
     int i = ROUND;
     while (i--) {
         randombytes(msg1, AIGIS_SEED_SIZE);
-        int ret = sig_keypair(pub, sec);
+        int ret = aigis_sig_keypair(pub, sec);
         if (ret) {
             puts("unable to correctly generate sign-keypair!");
             return 1;
         }
         // 调试用输出msg
-        ret = crypto_sign(sig_msg, &sig_msg_len, msg1, AIGIS_SEED_SIZE, ctx, AIGIS_SEED_SIZE, sec);
+        ret = aigis_create_sign(sig_msg, &sig_msg_len, msg1, AIGIS_SEED_SIZE, ctx, AIGIS_SEED_SIZE, sec);
         if (ret || sig_msg_len != AIGIS_SIG_SIG_SIZE + AIGIS_SEED_SIZE) {
             puts("unable to correctly sign message!");
             return 1;
         }
-        ret = crypto_sign_open(msg2, &msg_len, sig_msg, sig_msg_len, ctx, AIGIS_SEED_SIZE, pub);
+        ret = aigis_reveal_sign(msg2, &msg_len, sig_msg, sig_msg_len, ctx, AIGIS_SEED_SIZE, pub);
         if (ret || msg_len != AIGIS_SEED_SIZE) {
             puts("unable to verify signature!");
             return 1;
@@ -49,7 +49,7 @@ int main() {
             randombytes(msg2, 1);
         } while(!msg2[0]);
         sig_msg[pos % AIGIS_SIG_SIG_SIZE] += msg2[0];
-        ret = crypto_sign_open(msg2, &msg_len, sig_msg, sig_msg_len, ctx, AIGIS_SEED_SIZE, pub);
+        ret = aigis_reveal_sign(msg2, &msg_len, sig_msg, sig_msg_len, ctx, AIGIS_SEED_SIZE, pub);
         if (!ret) {
             puts("impossible condition!");
             return 1;
