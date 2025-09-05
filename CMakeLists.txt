@@ -2,7 +2,7 @@
 #
 # (C) All rights reserved. Author: <kisfg@hotmail.com> in 2025
 # Created at 2025年07月31日 星期四 15时26分35秒
-# Last modified at 2025年07月31日 星期四 22时05分51秒
+# Last modified at 2025/09/06 星期六 01:30:22
 cmake_minimum_required(VERSION 3.13.0)
 project(aigis C)
 set(CMAKE_C_STANDARD 11)
@@ -45,9 +45,10 @@ foreach(test_case ${test_cases})
 	list(APPEND testcases ${test_name})
 endforeach()
 
-add_custom_target(
-	run
+add_custom_target(run
+	COMMAND ${testcases}
 	DEPENDS ${testcases}
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	COMMENT "test testcases"
 )
 

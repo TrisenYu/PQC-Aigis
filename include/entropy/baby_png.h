@@ -1,20 +1,20 @@
-/// Last modified at 2025年07月31日 星期四 16时34分59秒
+/// Last modified at 2025/09/05 星期五 23:58:24
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 
 #if defined(_WIN32) || defined(_WIN64)
-    #include <windows.h>
-    #include <wincrypt.h>
+	#include <windows.h>
+	#include <wincrypt.h>
 #else
-    #include <fcntl.h>
-    #include <errno.h>
+	#include <fcntl.h>
+	#include <errno.h>
 #endif // windows check
 
-#ifdef __linux__
-    #include <unistd.h>
-    #define _GNU_SOURCE
-    #include <sys/syscall.h>
+#if defined(__linux__) || defined(__APPLE__)
+	#include <unistd.h>
+	#define _GNU_SOURCE
+	#include <sys/syscall.h>
 #endif // linux check
 
 #ifndef __BABY_PRG_H__

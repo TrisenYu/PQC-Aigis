@@ -1,14 +1,16 @@
+# Last modified at 2025/09/06 星期六 01:39:11
 name: encapsulation and signature test-ci/cd.
 on: [push]
 
 jobs:
   normal-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         cc: ["clang", "gcc"]
         kdf_conf: [0, 1]
         param_conf: [1, 2, 3]
+        os: [ubuntu-latest, macos-latest, windows-latest]
       max-parallel: 4
 
     steps:
@@ -16,10 +18,18 @@ jobs:
         uses: actions/checkout@main
         env:
           ccompiler: ${{ matrix.cc }}
-      - name: 下依赖
+      - name: linux下配依赖
+        if: matrix.os == 'ubuntu-latest'
         run: |
           if [[ "$ccompiler" == "clang" ]]; then
             sudo apt install clang
+          fi
+
+      - name: mac下配依赖
+        if: matrix.os == 'macos-latest'
+        run: |
+          if [[ "$ccompiler" == "clang" ]]; then
+            brew install clang
           fi
 
       - name: compile-and-test
@@ -27,11 +37,31 @@ jobs:
           aigis_param: ${{ matrix.param_conf }}
           kdf: ${{ matrix.kdf_conf }}
           ccompiler: ${{ matrix.cc }}
+        if: matrix.os != 'windows-latest'
         run: |
-          mkdir -p build && cd build
+          mkdir -p build
+          cd build
           cmake \
           -DAIGIS_PARAM_CONF=$aigis_param \
           -DAIGIS_KDF_CONF=$kdf \
           -DCMAKE_C_COMPILER=$ccompiler ..
           make run
-          echo 'done...'
+          echo done...
+
+      - name: compile-and-test-for-win
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        # 在 Windows 环境下，CMake 通常默认生成的是 MSBuild 项目（.sln 和 .vcxproj）而不是 Makefile
+        # 但是实际用起来很难用
+        # 安装Ninja构建工具
+        # 将Ninja添加到环境变量
+        # --% 让 powershell 停止解析参数给自己
+        run: |
+          choco install mingw llvm -y
+          echo "C:\ProgramData\chocolatey\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          New-Item -ItemType Directory -Path build -Force
+          cd build
+          cmake -G 'Unix Makefiles' -DCMAKE_C_COMPILER=${{ matrix.cc }} -DAIGIS_PARAM_CONF=${{ matrix.param_conf }} -DAIGIS_KDF_CONF=${{ matrix.kdf_conf }} ..
+          make
+          cmake --build . --target run
+          echo done

@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 17时47分45秒
+/// Last modified at 2025/09/06 星期六 00:28:31
 #include "sm3/sm3.h"
 #include "sm3/kdf.h"
 #include "keccak/fips202.h"
@@ -176,7 +176,7 @@ static void sha_ke256_squeeze(
 static void sm3_256(
     uint8_t *res,
     const uint8_t *inp,
-    uint64_t inp_len
+    size_t inp_len
 ) {
     sm3_extented(res, 32, inp, inp_len);
 }
@@ -185,7 +185,7 @@ static void sm3_256(
 static void sm3_512(
     uint8_t *res,
     const uint8_t *inp,
-    uint64_t inp_len
+    size_t inp_len
 ) {
     sm3_extented(res, 64, inp, inp_len);
 }
@@ -224,19 +224,18 @@ typedef void (*_kdf_squeeze) (
 typedef void (*_hash_x) (
     uint8_t *res,
     const uint8_t *inp,
-    uint64_t inp_len
+    size_t inp_len
 );
 
 /// XOF
 typedef void (*_kdf_xof) (
     uint8_t *res,
-    uint64_t res_len,
+    size_t res_len,
     const uint8_t *inp,
-    uint64_t inp_len
+    size_t inp_len
 );
 
 void kdf_destroy(kdf_state *);
-// 看这种方式有无问题
 extern _kdf_init				kdf_init;
 extern _kdf_alter_inp_buf		kdf_alter_inp_buf;
 extern _kdf_squeeze				kdf_squeeze;

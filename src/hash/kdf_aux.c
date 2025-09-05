@@ -2,7 +2,7 @@
 ///
 /// (C) All rights reserved. Author: <kisfg@hotmail.com> in 2025
 /// Created at 2025年07月31日 星期四 16时27分29秒
-/// Last modified at 2025年07月31日 星期四 16时31分54秒
+/// Last modified at 2025/09/06 星期六 00:27:56
 #include "hash/kdf_aux.h"
 #if (AIGIS_KDF_CONF == 0)
     _kdf_init				kdf_init			=		init_sm3;
@@ -19,7 +19,7 @@
     _hash_x hash_g = sm3_512;
 
     _kdf_xof kdf_xof128 = sm3_extented;
-    _kdf_xof kdf_xof256 = sm3_extented; // 非常难绷
+    _kdf_xof kdf_xof256 = sm3_extented;
 
 #elif (AIGIS_KDF_CONF == 1)
     _kdf_init				kdf_init = init_sha_ke;

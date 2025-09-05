@@ -1,4 +1,4 @@
-/// Last modified at 2025年07月31日 星期四 16时34分34秒
+/// Last modified at 2025/09/05 星期五 23:56:17
 #include "entropy/baby_png.h"
 #if defined(_WIN32) || defined(_WIN64)
     void randombytes(uint8_t *out, size_t outlen) {
@@ -39,7 +39,7 @@
             outlen -= ret;
         }
     }
-#else
+#else // mac
     void randombytes(uint8_t *out, size_t outlen) {
         static int fd = -1;
         ssize_t ret;
